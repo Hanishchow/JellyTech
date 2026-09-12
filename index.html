@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>JellyTech — Bio Infinity Forum</title>
+
+    <meta name="description" content="JellyTech: events, paper presentations, research, podcasts and industry visits. Editorial wing, Bio Infinity Forum.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="./static/img/favicon.ico">
+    <link rel="stylesheet" href="./static/css/style.css" />
+    <style>
+      /* JellyTech first-page overlay (placeholder content, step-by-step) */
+      :root {
+        --jelly-cyan: #7ee7f5;
+        --ink: #f2f7fa;
+        --ink-dim: rgba(242, 247, 250, 0.72);
+      }
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        background: #0a0610;
+        font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      }
+      #container { position: fixed; inset: 0; }
+      #container canvas { display: block; }
+
+      /* Dev chrome from the upstream demo — hidden for the club page.
+         Re-enable for tuning by removing this block. */
+      #container-controls, #container-stats,
+      #info, #cover-info { display: none !important; }
+
+      .club-ui { position: fixed; inset: 0; pointer-events: none; color: var(--ink); }
+      .club-ui a { pointer-events: auto; }
+
+      .club-nav {
+        position: absolute; top: 0; left: 0; right: 0;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 20px 32px;
+      }
+      .club-brand { pointer-events: auto; line-height: 1.2; }
+      .club-brand strong { font-size: 22px; letter-spacing: 0.12em; }
+      .club-brand small { display: block; font-size: 11px; letter-spacing: 0.22em; color: var(--ink-dim); }
+      .club-links { display: flex; gap: 22px; font-size: 13px; letter-spacing: 0.14em; }
+      .club-links a { color: var(--ink-dim); text-decoration: none; }
+      .club-links a:hover { color: var(--jelly-cyan); }
+
+      .club-hero {
+        position: absolute; left: 0; right: 0; bottom: 12%;
+        text-align: center; padding: 0 24px;
+      }
+      .club-eyebrow {
+        font-size: 12px; letter-spacing: 0.34em; color: var(--jelly-cyan);
+        margin-bottom: 14px;
+      }
+      .club-hero h1 {
+        margin: 0 0 12px; font-size: clamp(48px, 9vw, 110px);
+        letter-spacing: 0.08em; font-weight: 200;
+        text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+      }
+      .club-tag { margin: 0 auto 26px; max-width: 620px; color: var(--ink-dim); font-size: 16px; }
+      .club-cta { display: flex; gap: 14px; justify-content: center; }
+      .club-btn {
+        display: inline-block; padding: 12px 28px; border-radius: 999px;
+        font-size: 14px; letter-spacing: 0.08em; text-decoration: none;
+      }
+      .club-btn.primary { background: var(--jelly-cyan); color: #06222a; font-weight: 600; }
+      .club-btn.ghost { border: 1px solid rgba(242, 247, 250, 0.45); color: var(--ink); }
+
+      .club-foot {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 14px 32px; font-size: 11px; letter-spacing: 0.18em; color: var(--ink-dim);
+      }
+      .club-foot a { color: var(--ink-dim); }
+
+      @media (max-width: 720px) {
+        .club-links { display: none; }
+        .club-nav { padding: 16px 20px; }
+        .club-foot { padding: 12px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+
+    <div class="club-ui">
+      <nav class="club-nav">
+        <div class="club-brand">
+          <strong>JELLYTECH</strong>
+          <small>BIO INFINITY FORUM &middot; EDITORIAL WING</small>
+        </div>
+        <div class="club-links">
+          <!-- Placeholder links: real sections land here as we build step by step -->
+          <a href="#events">EVENTS</a>
+          <a href="#research">RESEARCH</a>
+          <a href="#podcasts">PODCASTS</a>
+          <a href="#visits">VISITS</a>
+          <a href="#team">TEAM</a>
+          <a href="#join">JOIN</a>
+        </div>
+      </nav>
+
+      <main class="club-hero">
+        <div class="club-eyebrow">PAPERS &middot; RESEARCH &middot; PODCASTS &middot; INDUSTRY VISITS</div>
+        <h1>JellyTech</h1>
+        <!-- Placeholder tagline: founder to approve/replace -->
+        <p class="club-tag">The student hub for paper presentations, research updates, podcasts and industry connect — under the Bio Infinity Forum.</p>
+        <div class="club-cta">
+          <a class="club-btn primary" href="#events">Explore Events</a>
+          <a class="club-btn ghost" href="#join">Join the Club</a>
+        </div>
+      </main>
+
+      <footer class="club-foot">
+        <span>SCROLL &darr; CLICK THE JELLYFISH</span>
+        <span>SIM: <a href="https://github.com/milcktoast/particulate-medusae">MEDUSAE &copy; ASH WEEKS</a> &middot; ARTISTIC-2.0</span>
+      </footer>
+    </div>
+
+    <script src="./static/lib/three/three.js"></script>
+    <script src="./static/js/libs.develop.js"></script>
+    <script src="./static/js/shader-chunks.develop.js"></script>
+    <script src="./static/js/shaders.develop.js"></script>
+    <script src="./static/js/app.develop.js"></script>
+    <script>
+      // Audio omitted on purpose for the club page (autoplay + weight).
+      App.STATIC_URL = "./static/";
+    </script>
+  </body>
+</html>
