@@ -22,6 +22,28 @@
     </style>
   </head>
   <body>
+    <!-- Required by the sim (toggle/modal/stats bindings). Kept hidden:
+         the page is pure canvas, no visible UI. Do NOT delete these. -->
+    <article id="info" class="modal info-modal"></article>
+    <div id="cover-info" class="modal-cover"></div>
+
+    <div id="container-controls">
+      <div id="toggle-info" class="controls-button"></div>
+      <div id="toggle-dots" class="controls-button"></div>
+      <div id="menu-colors" class="controls-menu"></div>
+      <div id="toggle-colors" class="controls-button"></div>
+      <div id="toggle-audio" class="controls-button"></div>
+      <div id="toggle-postfx" class="controls-button"></div>
+      <div id="toggle-sim" class="controls-button"></div>
+    </div>
+
+    <div id="container-stats" class="stats-panel">
+      <div id="container-graphs"></div>
+      <dl><dt>Particles</dt><dd id="particle-count"></dd></dl>
+      <dl><dt>Constraints</dt><dd id="constraint-count"></dd></dl>
+      <dl><dt>Forces</dt><dd id="force-count"></dd></dl>
+    </div>
+
     <div id="container"></div>
 
     <script src="./static/lib/three/three.js"></script>
