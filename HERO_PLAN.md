@@ -72,3 +72,13 @@ react-three-fiber — avoids reconciler overhead on a per-frame scene):
 ## Log
 - Saved 2026-09-12. No code ported, nothing installed, nothing integrated.
 - Next: founder gives site layout step by step; hero section spec comes from that.
+
+## Live demo (original upstream, for look/feel review ONLY)
+- URL: http://127.0.0.1:8931/index.html (local, serves hand-rolled `develop`
+  build of upstream — Grunt 0.4 can't run on Node 24, so the build was
+  replicated with `medusae-build.py` + dart-sass + fetched period deps:
+  three r72, particulate 0.3.2, noisejs perlin).
+- Demo lives OUTSIDE this repo (temp clone) — intentionally not committed here.
+- Restart if down: run `medusae-server.py` (pythonw, port 8931).
+- Review checklist: jellyfish animating? stats panel counts? PostFX toggle?
+  click-jelly nudge? any console errors? Report back before hero port.
