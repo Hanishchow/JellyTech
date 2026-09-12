@@ -840,8 +840,128 @@ export default function LiquidMetalButtonDemo() {
 }
 ```
 
+## Element 03 — shadcnblocks Navbar1 (SAVED + VANILLA-PORTED to hero)
+- Block source: NOT pasted (only the demo usage below); `Navbar1` itself comes
+  from `@/components/blocks/shadcnblocks-com-navbar1` (shadcnblocks.com).
+- Planned React path (when modern stack lands): install block via shadcn CLI,
+  `lucide-react` icons (`Book, Sunset, Trees, Zap`), render `<Navbar1 {...demoData} />`.
+- Interim path (DONE 2026-09-13): faithful vanilla HTML/CSS/JS port on the
+  classic hero page — same structure/behavior (desktop dropdowns, mobile drawer
+  with accordions + extra links, auth buttons), dark-glass styled for the
+  jellyfish backdrop. No React/Tailwind on the page yet.
+- NOTE: pasted demo content is shadcnblocks placeholder content (logo, urls,
+  Log in/Sign up). Swap to JellyTech sections in a later step.
+
+### Demo spec (verbatim, as pasted by founder)
+```tsx
+import { Book, Sunset, Trees, Zap } from "lucide-react";
+import { Navbar1 } from "@/components/blocks/shadcnblocks-com-navbar1"
+
+const demoData = {
+  logo: {
+    url: "https://www.shadcnblocks.com",
+    src: "https://cdn.21st.dev/assets/mirror/06/067c72836298829da27d230af61c2b4be0e09da5103dc2789639d18beea789f4.svg",
+    alt: "blocks for shadcn/ui",
+    title: "Shadcnblocks.com",
+  },
+  menu: [
+    {
+      title: "Home",
+      url: "https://www.shadcnblocks.com",
+    },
+    {
+      title: "Products",
+      url: "#",
+      items: [
+        {
+          title: "Blog",
+          description: "The latest industry news, updates, and info",
+          icon: <Book className="size-5 shrink-0" />,
+          url: "/blog",
+        },
+        {
+          title: "Company",
+          description: "Our mission is to innovate and empower the world",
+          icon: <Trees className="size-5 shrink-0" />,
+          url: "/company",
+        },
+        {
+          title: "Careers",
+          description: "Browse job listing and discover our workspace",
+          icon: <Sunset className="size-5 shrink-0" />,
+          url: "/careers",
+        },
+        {
+          title: "Support",
+          description:
+            "Get in touch with our support team or visit our community forums",
+          icon: <Zap className="size-5 shrink-0" />,
+          url: "/support",
+        },
+      ],
+    },
+    {
+      title: "Resources",
+      url: "#",
+      items: [
+        {
+          title: "Help Center",
+          description: "Get all the answers you need right here",
+          icon: <Zap className="size-5 shrink-0" />,
+          url: "/help",
+        },
+        {
+          title: "Contact Us",
+          description: "We are here to help you with any questions you have",
+          icon: <Sunset className="size-5 shrink-0" />,
+          url: "/contact",
+        },
+        {
+          title: "Status",
+          description: "Check the current status of our services and APIs",
+          icon: <Trees className="size-5 shrink-0" />,
+          url: "/status",
+        },
+        {
+          title: "Terms of Service",
+          description: "Our terms and conditions for using our services",
+          icon: <Book className="size-5 shrink-0" />,
+          url: "/terms",
+        },
+      ],
+    },
+    {
+      title: "Pricing",
+      url: "/pricing",
+    },
+    {
+      title: "Blog",
+      url: "/blog",
+    },
+  ],
+  mobileExtraLinks: [
+    { name: "Press", url: "/press" },
+    { name: "Contact", url: "/contact" },
+    { name: "Imprint", url: "/imprint" },
+    { name: "Sitemap", url: "/sitemap" },
+  ],
+  auth: {
+    login: { text: "Log in", url: "/login" },
+    signup: { text: "Sign up", url: "/signup" },
+  },
+};
+
+function Navbar1Demo() {
+  return <Navbar1 {...demoData} />;
+}
+
+export { Navbar1Demo };
+```
+
 ## Log
 - Saved 2026-09-12 as Element 01. No install, no scaffold, no integration.
 - Original message contained the spec twice (deduplicated here).
 - Saved 2026-09-12 as Element 02 (liquid-metal-button). No install, no scaffold, no integration.
-- Next: send more elements the same way; they will be appended as Element 03, 04, ...
+- Saved 2026-09-13 as Element 03 (shadcnblocks Navbar1 demo) + vanilla-ported
+  onto the classic hero page (dark-glass, pasted demo content as-is).
+- Next: send more elements the same way; they will be appended as Element 04, ...
