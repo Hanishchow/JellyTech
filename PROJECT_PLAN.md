@@ -27,8 +27,8 @@ Home, Events, Research & Papers, Podcasts, Industry Connect/Visits, Fun & Studen
   or full port — founder decides in a later step.
 
 ## Step 3 — First page ✅ LIVE (local preview)
-- `index.html`: fullscreen jellyfish canvas + JellyTech overlay (placeholder nav:
-  Events, Research, Podcasts, Visits, Team, Join; placeholder tagline + CTAs).
+- `index.html`: pure fullscreen jellyfish canvas, sim always active, zero overlay
+  UI (overlay removed per founder 2026-09-12).
 - Dev chrome from upstream demo hidden via CSS (re-enable for tuning).
 - Audio omitted (autoplay + 4 MB weight).
 - Local preview: http://127.0.0.1:8932/index.html (restart: serve.py 8932 <repo>).
