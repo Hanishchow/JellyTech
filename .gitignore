@@ -1,0 +1,12 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+
+# Deps / build (for later, whatever stack we pick)
+node_modules/
+dist/
+build/
+.next/
+out/
