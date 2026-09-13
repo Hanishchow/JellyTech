@@ -3139,7 +3139,17 @@ function MainScene() {
   this.raycaster = new THREE.Raycaster();
   this.nudgeIndex = 0;
 
-  this.pxRatio = PMath.clamp(1.5, 2, window.devicePixelRatio);
+  /* Upstream renders at 1.5x-2x device pixels, which is a deliberate choice
+     for a demo running alone on a desktop. On a phone it is the single most
+     expensive line in the file: this scene is fill-rate bound (four
+     full-screen post-effect passes on top of the scene itself), and a modern
+     handset reporting dpr 3 would be asked for 2x supersampling, so every one
+     of those passes shades four times the pixels it needs to. Phones get 1x.
+     The animal is small on that screen anyway and the difference is invisible;
+     the frame rate difference is not. */
+  this.pxRatio = App.isNarrow && App.isNarrow()
+    ? 1
+    : PMath.clamp(1.5, 2, window.devicePixelRatio);
   this.gravity = -2;
 
   this.usePostFx = true;
@@ -3717,6 +3727,31 @@ App.FRAMING = {
   distance: [0.45, 0.75] // multiple of upstream's 500 * scale
 };
 
+/* Phones are not small desktops.
+
+   Upstream scales the whole scene by viewport HEIGHT alone (scale = height /
+   1000) and ignores width entirely, which is fine on a landscape display and
+   wrong on a portrait one: a phone is tall, so the scale comes out large, and
+   the animal is then far too wide for the screen it is on. Combined with the
+   close framing the desktop uses, the bell simply runs off both edges.
+
+   So a narrow screen gets its own framing, fixed rather than rolled: a flat
+   angle and enough distance for the whole animal to fit. Fixed because the
+   margin for error is tiny at this width, and one bad roll on a phone is the
+   entire hero rather than a corner of it. */
+App.MOBILE_BREAKPOINT = 768;
+
+App.MOBILE_FRAMING = {
+  azimuth: 18,
+  elevation: 10,   // flat, so the bell is seen side-on rather than from above
+  distance: 2.0    // tested against 375x812: 1.6 crowds both edges, 2.35 is
+                   // small enough to read as decoration, 2.0 fits with margin
+};
+
+App.isNarrow = function () {
+  return window.innerWidth < App.MOBILE_BREAKPOINT;
+};
+
 App.randomFraming = function () {
   var f = App.FRAMING;
   var lerp = function (range) {
@@ -3776,9 +3811,14 @@ App.startBackground = function (options) {
 
   App.scene = scene;
 
-  /* Opt-in, so the default stays exactly upstream's framing. */
+  /* Opt-in, so the default stays exactly upstream's framing. A narrow screen
+     takes the fixed mobile framing instead of a roll. */
   if (options && options.randomFraming) {
-    App.frameCamera(scene, options.framing || App.randomFraming());
+    App.frameCamera(
+      scene,
+      options.framing ||
+        (App.isNarrow() ? App.MOBILE_FRAMING : App.randomFraming())
+    );
   }
 
   scene.loop.start();
