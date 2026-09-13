@@ -73,7 +73,18 @@ export function Footer() {
       <div className="relative border-t border-rule">
         <div className="mx-auto flex max-w-page flex-col gap-2 px-6 py-6 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint sm:flex-row sm:items-center sm:justify-between">
           <span>Acharya Institute of Technology, Bengaluru</span>
-          <span>Background: particulate-medusae by Ash Weeks, Artistic-2.0</span>
+          {/* The upstream attribution has not been dropped, only moved: the
+              background is Ash Weeks' work under Artistic-2.0, which requires
+              the notice to travel with it, and it now sits in the Attribution
+              clause on the Terms page rather than the footer strip. */}
+          <a
+            href="https://hanishchow.github.io/"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="transition-colors hover:text-glow-bright"
+          >
+            Made by Hanishchow
+          </a>
         </div>
       </div>
     </footer>

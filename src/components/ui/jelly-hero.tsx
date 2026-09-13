@@ -65,8 +65,10 @@ export function JellyHero() {
     )
       .then(() => {
         if (cancelled) return;
-        // startBackground returns null when the renderer cannot be built.
-        if (!window.App?.startBackground?.()) useFallback();
+        // Framing is rolled on every load, so no two arrivals are the same
+        // photograph. The bounds live in App.FRAMING; /lab/framing is where
+        // they get judged.
+        if (!window.App?.startBackground?.({ randomFraming: true })) useFallback();
       })
       .catch(() => useFallback());
 

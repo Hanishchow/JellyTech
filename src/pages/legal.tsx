@@ -103,7 +103,30 @@ export function TermsPage() {
           <Clause title="Attribution">
             <p>
               The animated background is the particulate-medusae simulation by
-              Ash Weeks (milcktoast), used under the Artistic-2.0 licence.
+              Ash Weeks (milcktoast), used under the Artistic-2.0 licence. The
+              source is at{" "}
+              <a
+                href="https://github.com/milcktoast/particulate-medusae"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-glow-bright underline underline-offset-4"
+              >
+                github.com/milcktoast/particulate-medusae
+              </a>
+              , and the copy running here is unmodified apart from the removal
+              of its demo control panel.
+            </p>
+            <p>
+              This site was built by{" "}
+              <a
+                href="https://hanishchow.github.io/"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-glow-bright underline underline-offset-4"
+              >
+                Hanishchow
+              </a>
+              .
             </p>
           </Clause>
         </div>

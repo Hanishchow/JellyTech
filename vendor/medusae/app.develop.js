@@ -3691,33 +3691,30 @@ MainScene.prototype.render = function (delta, stepProgress) {
    is 500 units out, 36.9 degrees above the horizon, on the +X axis.
 
    This rolls that framing within bounds, so a second visit is not the same
-   photograph. The bounds are the point, not the randomness:
+   photograph. The bounds are the point, not the randomness, and they are the
+   founder's call, set 2026-09-13:
 
-   The bounds below were not guessed. Each corner was forced at /lab/framing
-   and looked at, and the first guess (14-42 degrees, 0.82-1.22x) was wrong in
-   an instructive direction:
+   · ELEVATION 30 to 50 degrees.
+   · DISTANCE 0.45x to 0.75x, which is considerably closer than upstream's
+     default and makes the animal the subject rather than the backdrop.
+     TrackballControls clamps at 0.40x (scale*200 in onWindowResize), so the
+     near end of this sits just inside the legal floor.
 
-   · ELEVATION runs 4 to 30 degrees. The failure mode is entirely at the top:
-     by 42 degrees you are looking down the crown of the bell, the tentacles
-     are hidden behind it, and the animal reads as a blob. Low is the opposite
-     of a risk. At 2 degrees it is a side-on portrait with every tentacle
-     visible, and it is the best framing the scene produces, so the floor is
-     set just off dead-level rather than well above it. Upstream's own 36.9
-     now sits OUTSIDE this range, which is the finding.
-   · DISTANCE runs 0.80x to 1.06x. TrackballControls legally allows 0.4x-2.4x
-     (scale*200 to scale*1200 in onWindowResize) but the useful band is far
-     narrower: by 1.22x the animal is small enough to read as decoration
-     rather than subject.
-   · AZIMUTH is unbounded. The medusa is radially symmetric, so every angle
+   · AZIMUTH stays unbounded. The medusa is radially symmetric, so every angle
      around it is as good as any other, and it supplies most of the variety.
 
-   The target stays at the origin. Offsetting it as well was tried and looked
-   like a mistake rather than a composition.
+   Noted for whoever revisits this: an earlier pass forced each corner at
+   /lab/framing and found the high end of elevation unflattering, because at
+   around 42 degrees you look down the crown of the bell and the tentacles
+   hide behind it. That was measured at roughly upstream's distance. Pulling
+   the camera this much closer changes the picture, which is why the range was
+   set here rather than lower. If a roll ever looks wrong, elevation is the
+   first dial to try.
    ------------------------------------------------------------------------ */
 
 App.FRAMING = {
-  elevation: [4, 30],    // degrees above the horizon
-  distance: [0.80, 1.06] // multiple of upstream's 500 * scale
+  elevation: [30, 50],   // degrees above the horizon
+  distance: [0.45, 0.75] // multiple of upstream's 500 * scale
 };
 
 App.randomFraming = function () {
