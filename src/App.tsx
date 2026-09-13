@@ -12,6 +12,7 @@ import { JoinPage } from '@/pages/join'
 import { LoginPage } from '@/pages/login'
 import { DashboardPage } from '@/pages/dashboard'
 import { PrivacyPage, TermsPage, NotFoundPage } from '@/pages/legal'
+import { AdminPage } from '@/pages/admin'
 
 /* The site used to be twenty-two routes across two dropdown menus, most of
    them a page-length description of something that had not happened yet. Those
@@ -35,6 +36,17 @@ const REDIRECTS: Record<string, string> = {
   '/forgot-password': '/login',
 }
 
+/* The loading screen is markup in index.html, so something has to take it away.
+   On the public site that is TetrisLoader, which plays the board out first; the
+   panel skips the ceremony and removes it on sight. Without this the admin
+   route sits behind a tetris game forever. */
+function DismissLoader() {
+  useEffect(() => {
+    document.getElementById('tl-screen')?.remove()
+  }, [])
+  return null
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
@@ -44,6 +56,21 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const { pathname } = useLocation()
+
+  /* The admin panel deliberately sits outside the site's chrome: no navbar, no
+     footer, no loading screen, no jellyfish. It is a different room. */
+  if (pathname.startsWith('/admin')) {
+    return (
+      <>
+        <DismissLoader />
+        <Routes>
+          <Route path="/admin" element={<AdminPage />} />
+        </Routes>
+      </>
+    )
+  }
+
   return (
     <div className="min-h-[100dvh] bg-ground text-ink">
       <TetrisLoader />

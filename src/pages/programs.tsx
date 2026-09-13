@@ -2,6 +2,7 @@
 
 import { Masthead, Page, Section, Index, Plates, Note } from "@/components/layout/editorial";
 import { ImageStreamHero } from "@/components/ui/image-stream-hero";
+import { OpportunityList } from "@/components/ui/opportunity-list";
 import { STREAM_IMAGES } from "@/lib/imagery";
 
 const PROCESS = [
@@ -93,12 +94,10 @@ export function ProgramsPage() {
         intro="Each tracked opportunity records its date, institution, field, eligibility, registration deadline, cost, location, relevance, the student profile it suits and the club action required. These are the founding focus areas."
       >
         <Plates items={THEMES} />
-        <div className="mt-10">
-          <Note>
-            The calendar is maintained by the Conferences &amp; Outreach team.
-            Entries will be published here once the first cycle of opportunities
-            has been evaluated and approved.
-          </Note>
+
+        <div className="mt-20">
+          <p className="label mb-6">Tracked now</p>
+          <OpportunityList />
         </div>
       </Section>
 
