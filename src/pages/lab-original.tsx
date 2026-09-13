@@ -27,15 +27,6 @@ const SCRIPTS = [
   "static/medusae/app.develop.js",
 ];
 
-declare global {
-  interface Window {
-    App?: {
-      startBackground?: () => unknown;
-      stopBackground?: () => void;
-    };
-  }
-}
-
 type State = "loading" | "running" | "failed";
 
 export function LabOriginalPage() {

@@ -26,6 +26,9 @@ const LabMedusaPage = lazy(() =>
 const LabOriginalPage = lazy(() =>
   import('@/pages/lab-original').then((m) => ({ default: m.LabOriginalPage }))
 )
+const LabFramingPage = lazy(() =>
+  import('@/pages/lab-framing').then((m) => ({ default: m.LabFramingPage }))
+)
 
 /* The site used to be twenty-two routes across two dropdown menus, most of
    them a page-length description of something that had not happened yet. Those
@@ -82,6 +85,7 @@ export default function App() {
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/lab/medusa" element={<LabMedusaPage />} />
             <Route path="/lab/original" element={<LabOriginalPage />} />
+            <Route path="/lab/framing" element={<LabFramingPage />} />
           </Routes>
         </Suspense>
       </>

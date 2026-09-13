@@ -30,15 +30,6 @@ const SIM_SCRIPTS = [
   "static/medusae/app.develop.js",
 ];
 
-declare global {
-  interface Window {
-    App?: {
-      startBackground?: () => unknown;
-      stopBackground?: () => void;
-    };
-  }
-}
-
 function loadScript(src: string) {
   return new Promise<void>((resolve, reject) => {
     // Upstream defines its globals once and cannot be re-evaluated cleanly, so

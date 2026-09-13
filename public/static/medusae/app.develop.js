@@ -3684,7 +3684,81 @@ MainScene.prototype.render = function (delta, stepProgress) {
    are live at a time, and a few round trips through the route is enough to
    exhaust that budget if the old ones are merely dropped.
    ---------------------------------------------------------------------- */
-App.startBackground = function () {
+/* ---- JellyTech: camera framing ----------------------------------------
+
+   Upstream frames the animal once and identically on every load: the camera
+   sits at (400, 300, 0) scaled by viewport height, looking at the origin. That
+   is 500 units out, 36.9 degrees above the horizon, on the +X axis.
+
+   This rolls that framing within bounds, so a second visit is not the same
+   photograph. The bounds are the point, not the randomness:
+
+   The bounds below were not guessed. Each corner was forced at /lab/framing
+   and looked at, and the first guess (14-42 degrees, 0.82-1.22x) was wrong in
+   an instructive direction:
+
+   · ELEVATION runs 4 to 30 degrees. The failure mode is entirely at the top:
+     by 42 degrees you are looking down the crown of the bell, the tentacles
+     are hidden behind it, and the animal reads as a blob. Low is the opposite
+     of a risk. At 2 degrees it is a side-on portrait with every tentacle
+     visible, and it is the best framing the scene produces, so the floor is
+     set just off dead-level rather than well above it. Upstream's own 36.9
+     now sits OUTSIDE this range, which is the finding.
+   · DISTANCE runs 0.80x to 1.06x. TrackballControls legally allows 0.4x-2.4x
+     (scale*200 to scale*1200 in onWindowResize) but the useful band is far
+     narrower: by 1.22x the animal is small enough to read as decoration
+     rather than subject.
+   · AZIMUTH is unbounded. The medusa is radially symmetric, so every angle
+     around it is as good as any other, and it supplies most of the variety.
+
+   The target stays at the origin. Offsetting it as well was tried and looked
+   like a mistake rather than a composition.
+   ------------------------------------------------------------------------ */
+
+App.FRAMING = {
+  elevation: [4, 30],    // degrees above the horizon
+  distance: [0.80, 1.06] // multiple of upstream's 500 * scale
+};
+
+App.randomFraming = function () {
+  var f = App.FRAMING;
+  var lerp = function (range) {
+    return range[0] + Math.random() * (range[1] - range[0]);
+  };
+  return {
+    azimuth: Math.random() * 360,
+    elevation: lerp(f.elevation),
+    distance: lerp(f.distance)
+  };
+};
+
+/** Place the camera from an angle/zoom triple. Returns what it applied. */
+App.frameCamera = function (scene, framing) {
+  if (!scene || !framing) { return null; }
+
+  var camera = scene.camera;
+  var scale = scene.height / 1000;
+  var radius = 500 * scale * framing.distance;
+
+  var el = framing.elevation * Math.PI / 180;
+  var az = framing.azimuth * Math.PI / 180;
+
+  camera.position.set(
+    Math.cos(el) * Math.cos(az) * radius,
+    Math.sin(el) * radius,
+    Math.cos(el) * Math.sin(az) * radius
+  );
+  camera.lookAt(scene.scene.position);
+
+  /* TrackballControls recomputes its eye vector from the camera each update,
+     so it adopts the new position rather than dragging it back. */
+  if (scene.controls) { scene.controls.update(); }
+
+  scene.framing = framing;
+  return framing;
+};
+
+App.startBackground = function (options) {
   if (App.scene) { return App.scene; }
 
   /* A machine with no WebGL — or a browser that has run out of live contexts —
@@ -3704,6 +3778,12 @@ App.startBackground = function () {
   }
 
   App.scene = scene;
+
+  /* Opt-in, so the default stays exactly upstream's framing. */
+  if (options && options.randomFraming) {
+    App.frameCamera(scene, options.framing || App.randomFraming());
+  }
+
   scene.loop.start();
 
   return scene;
