@@ -4,7 +4,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Masthead, Page, Section, Note } from "@/components/layout/editorial";
 import { backend } from "@/lib/backend";
+import { OAuthButtons } from "@/components/ui/oauth-button";
 import { cn } from "@/lib/utils";
+import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 
 const field =
   "w-full border border-rule bg-ground px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-glow focus:outline-none";
@@ -37,7 +39,14 @@ export function LoginPage() {
       <Masthead eyebrow="Members" title="Member login" />
 
       <Section>
-        <form onSubmit={onSubmit} className="max-w-sm space-y-5 border-t border-rule pt-10">
+        <div className="max-w-sm border-t border-rule pt-10">
+          {/* Google lands back on /dashboard, which sorts out for itself
+              whether this person is a member yet or still has an application
+              to finish. */}
+          <OAuthButtons redirectTo={window.location.origin + import.meta.env.BASE_URL + "dashboard"} />
+        </div>
+
+        <form onSubmit={onSubmit} className="max-w-sm space-y-5 pt-8">
           <label className="block">
             <span className="label">Email</span>
             <input name="email" type="email" required className={cn(field, "mt-2")} />
@@ -49,13 +58,11 @@ export function LoginPage() {
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <button
+          <LiquidMetalButton
             type="submit"
             disabled={busy}
-            className="border border-glow bg-glow px-7 py-3.5 text-base font-medium text-white transition-colors hover:bg-transparent hover:text-glow-bright disabled:opacity-50"
-          >
-            {busy ? "Signing in…" : "Sign in"}
-          </button>
+            label={busy ? "Signing in…" : "Sign in"}
+          />
 
           <p className="text-sm text-ink-muted">
             Not a member yet?{" "}

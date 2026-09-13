@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Masthead, Page, Section, Plates, Note } from "@/components/layout/editorial";
 import {
   backend,
@@ -8,8 +8,12 @@ import {
   INTERESTS,
   type Department,
   type Interest,
+  type PendingAccount,
 } from "@/lib/backend";
+import { OAuthButtons } from "@/components/ui/oauth-button";
+import { ContactForm } from "@/components/ui/contact-form";
 import { cn } from "@/lib/utils";
+import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 
 const WHY = [
   { term: "No biotechnology background required", detail: "The club is biotechnology-led but AIT-wide. Electronics, CS/AI, mechanical, aeronautical and design students all have something to contribute." },
@@ -27,6 +31,30 @@ export function JoinPage() {
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
 
+  // Someone who signed in with Google already has an account but no
+  // membership. They finish the same form, minus the password they would
+  // never use.
+  const [pending, setPending] = useState<PendingAccount | null>(null);
+  const [checkedPending, setCheckedPending] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    backend
+      .pendingAccount()
+      .then((found) => {
+        if (!cancelled) {
+          setPending(found);
+          setCheckedPending(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCheckedPending(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const toggle = (interest: Interest) =>
     setInterests((current) =>
       current.includes(interest)
@@ -40,17 +68,25 @@ export function JoinPage() {
     setState("sending");
 
     const data = new FormData(event.currentTarget);
+    const details = {
+      name: String(data.get("name") ?? "").trim(),
+      email: String(data.get("email") ?? "").trim().toLowerCase(),
+      usn: String(data.get("usn") ?? "").trim() || undefined,
+      department: String(data.get("department")) as Department,
+      year: String(data.get("year")),
+      interests,
+      motivation: String(data.get("motivation") ?? "").trim() || undefined,
+    };
+
     try {
-      await backend.apply({
-        name: String(data.get("name") ?? "").trim(),
-        email: String(data.get("email") ?? "").trim().toLowerCase(),
-        password: String(data.get("password") ?? ""),
-        usn: String(data.get("usn") ?? "").trim() || undefined,
-        department: String(data.get("department")) as Department,
-        year: String(data.get("year")),
-        interests,
-        motivation: String(data.get("motivation") ?? "").trim() || undefined,
-      });
+      if (pending) {
+        await backend.completeApplication(details);
+      } else {
+        await backend.apply({
+          ...details,
+          password: String(data.get("password") ?? ""),
+        });
+      }
       setState("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -71,6 +107,23 @@ export function JoinPage() {
       </Section>
 
       <Section title="Membership application">
+        {checkedPending && !pending && state !== "done" && (
+          <div className="max-w-sm border-t border-rule pt-10">
+            {/* Coming back to /join rather than /dashboard: the account will
+                exist but the membership will not, and this page is where that
+                gets finished. */}
+            <OAuthButtons
+              redirectTo={window.location.origin + import.meta.env.BASE_URL + "join"}
+            />
+          </div>
+        )}
+
+        {pending && (
+          <p className="measure border-l-4 border-glow bg-glow/10 px-7 py-6 leading-relaxed text-ink-muted">
+            Signed in as <span className="text-ink">{pending.email}</span>. The
+            account exists; the club still needs the details below.
+          </p>
+        )}
         {state === "done" ? (
           <div className="border-t border-rule pt-10">
             <p className="font-display text-heading">Application recorded.</p>
@@ -91,36 +144,60 @@ export function JoinPage() {
             )}
           </div>
         ) : (
-          <form onSubmit={onSubmit} className="grid gap-10 border-t border-rule pt-10 lg:grid-cols-[1fr_20rem]">
+          <form
+            onSubmit={onSubmit}
+            className={cn(
+              "grid gap-10 pt-10 lg:grid-cols-[1fr_20rem]",
+              !pending && "border-t border-rule"
+            )}
+          >
             <div className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
                 <label className="block">
                   <span className="label">Full name</span>
-                  <input name="name" required className={cn(field, "mt-2")} />
+                  <input
+                    name="name"
+                    required
+                    defaultValue={pending?.name ?? ""}
+                    className={cn(field, "mt-2")}
+                  />
                 </label>
                 <label className="block">
                   <span className="label">Email</span>
-                  <input name="email" type="email" required className={cn(field, "mt-2")} />
+                  {/* Read-only once Google has vouched for it: the row is keyed
+                      to that account either way, so letting the two disagree
+                      would only produce a record nobody can be reached at. */}
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    defaultValue={pending?.email ?? ""}
+                    readOnly={!!pending}
+                    className={cn(field, "mt-2", pending && "text-ink-muted")}
+                  />
                 </label>
                 <label className="block">
                   <span className="label">USN (optional)</span>
                   <input name="usn" className={cn(field, "mt-2")} />
                 </label>
-                <label className="block">
-                  <span className="label">
-                    Password ({backend.passwordMinLength}+ characters)
-                  </span>
-                  {/* Applying creates the member's account, which is what makes
-                      the member area mean anything later. */}
-                  <input
-                    name="password"
-                    type="password"
-                    required
-                    minLength={backend.passwordMinLength}
-                    autoComplete="new-password"
-                    className={cn(field, "mt-2")}
-                  />
-                </label>
+                {!pending && (
+                  <label className="block">
+                    <span className="label">
+                      Password ({backend.passwordMinLength}+ characters)
+                    </span>
+                    {/* Applying creates the account, which is what makes the
+                        member area mean anything later. Someone who arrived
+                        via Google already has one. */}
+                    <input
+                      name="password"
+                      type="password"
+                      required
+                      minLength={backend.passwordMinLength}
+                      autoComplete="new-password"
+                      className={cn(field, "mt-2")}
+                    />
+                  </label>
+                )}
                 <label className="block">
                   <span className="label">Year</span>
                   <select name="year" required defaultValue="" className={cn(field, "mt-2")}>
@@ -174,22 +251,20 @@ export function JoinPage() {
 
               {error && <p className="text-sm text-destructive">{error}</p>}
 
-              <button
+              <LiquidMetalButton
                 type="submit"
                 disabled={state === "sending"}
-                className="border border-glow bg-glow px-7 py-3.5 text-base font-medium text-white transition-colors hover:bg-transparent hover:text-glow-bright disabled:opacity-50"
-              >
-                {state === "sending" ? "Submitting…" : "Submit application"}
-              </button>
+                label={state === "sending" ? "Submitting…" : "Submit application"}
+              />
             </div>
 
             <aside className="space-y-6 border-t border-rule pt-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
               <div>
-                <p className="label">Other ways to reach the club</p>
+                <p className="label">Not applying?</p>
                 <p className="measure mt-3 text-sm leading-relaxed text-ink-muted">
                   Speaker suggestions, media pitches, department collaborations
-                  and alumni introductions are all welcome. Say so in the box
-                  and the right team will pick it up.
+                  and alumni introductions do not need a membership. Use the
+                  contact form at the foot of this page.
                 </p>
               </div>
               <div>
@@ -203,6 +278,13 @@ export function JoinPage() {
             </aside>
           </form>
         )}
+      </Section>
+
+      <Section
+        title="Get in touch"
+        intro="For anything that is not a membership application: speakers, media, other departments, alumni, funding."
+      >
+        <ContactForm />
       </Section>
     </Page>
   );

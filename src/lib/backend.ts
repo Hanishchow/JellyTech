@@ -68,17 +68,34 @@ export interface Member {
   createdAt: string;
 }
 
-export interface Application {
+/** The details the club needs, independent of how the account was created. */
+export interface ApplicationDetails {
   name: string;
   email: string;
-  /** Applying creates the member's account, so the form collects a password. */
-  password: string;
   usn?: string;
   department: Department;
   year: string;
   interests: Interest[];
   motivation?: string;
 }
+
+export interface Application extends ApplicationDetails {
+  /** Applying with a password creates the account in the same step. */
+  password: string;
+}
+
+/**
+ * Someone who has authenticated (with Google, say) but has no membership
+ * record yet. They are half-way through applying, and the Join page finishes
+ * the job rather than asking them to invent a password they will never use.
+ */
+export interface PendingAccount {
+  id: string;
+  email: string;
+  name?: string;
+}
+
+export type OAuthProvider = "google" | "github";
 
 export interface Message {
   name: string;
@@ -92,7 +109,18 @@ export interface Backend {
   readonly isLive: boolean;
   /** Minimum password length the server will accept. */
   readonly passwordMinLength: number;
+  /** Empty when no third-party sign-in is available. */
+  readonly oauthProviders: readonly OAuthProvider[];
   apply(application: Application): Promise<Member>;
+  /**
+   * Finish an application for someone who is already authenticated. Used after
+   * a Google sign-in, where the account exists but the membership does not.
+   */
+  completeApplication(details: ApplicationDetails): Promise<Member>;
+  /** Send the browser to the provider. Never returns on success. */
+  startOAuth(provider: OAuthProvider, redirectTo: string): Promise<void>;
+  /** Authenticated but not yet a member, or null. */
+  pendingAccount(): Promise<PendingAccount | null>;
   contact(message: Message): Promise<void>;
   signIn(email: string, password: string): Promise<Member>;
   signOut(): Promise<void>;
@@ -158,17 +186,38 @@ function createInsforgeBackend(baseUrl: string, anonKey: string): Backend {
     return rows[0] ? toMember(rows[0]) : null;
   }
 
+  /** The membership row, once an account exists to attach it to. */
+  async function insertMember(userId: string, details: ApplicationDetails) {
+    const insert = await insforge.database
+      .from("members")
+      .insert({
+        id: userId,
+        name: details.name,
+        email: details.email.trim().toLowerCase(),
+        usn: details.usn ?? null,
+        department: details.department,
+        year: details.year,
+        interests: details.interests,
+        motivation: details.motivation ?? null,
+      })
+      .select();
+
+    const rows = unwrap(insert, "Could not record the application.") as MemberRow[];
+    const row = rows[0];
+    if (!row) throw new Error("Could not record the application.");
+    return toMember(row);
+  }
+
   return {
     isLive: true,
     passwordMinLength: PASSWORD_MIN,
+    oauthProviders: ["google"],
 
     async apply(application) {
-      const email = application.email.trim().toLowerCase();
-
       // Applying is a signup: the member row is keyed by the auth user's id,
       // so the account has to exist before the row can.
       const signUp = await insforge.auth.signUp({
-        email,
+        email: application.email.trim().toLowerCase(),
         password: application.password,
         name: application.name,
       });
@@ -178,25 +227,42 @@ function createInsforgeBackend(baseUrl: string, anonKey: string): Backend {
       if (!userId) {
         throw new Error("The account was created but returned no id.");
       }
+      return insertMember(userId, application);
+    },
 
-      const insert = await insforge.database
-        .from("members")
-        .insert({
-          id: userId,
-          name: application.name,
-          email,
-          usn: application.usn ?? null,
-          department: application.department,
-          year: application.year,
-          interests: application.interests,
-          motivation: application.motivation ?? null,
-        })
-        .select();
+    async completeApplication(details) {
+      const { data, error } = await insforge.auth.getCurrentUser();
+      if (error || !data?.user?.id) {
+        throw new Error("You are not signed in any more. Start again.");
+      }
+      return insertMember(data.user.id, details);
+    },
 
-      const rows = unwrap(insert, "Could not record the application.") as MemberRow[];
-      const row = rows[0];
-      if (!row) throw new Error("Could not record the application.");
-      return toMember(row);
+    async startOAuth(provider, redirectTo) {
+      // The SDK spots the `insforge_code` on the way back and exchanges it for
+      // a session by itself, so there is no callback route to write here.
+      const { error } = await insforge.auth.signInWithOAuth(provider, {
+        redirectTo,
+        additionalParams: { prompt: "select_account" },
+      });
+      if (error) {
+        throw new Error(
+          error instanceof Error ? error.message : "Could not reach the provider."
+        );
+      }
+    },
+
+    async pendingAccount() {
+      const { data, error } = await insforge.auth.getCurrentUser();
+      const user = data?.user;
+      if (error || !user?.id) return null;
+      // Signed in, but is there a membership behind it?
+      if (await memberFor(user.id)) return null;
+      return {
+        id: user.id,
+        email: user.email ?? "",
+        name: (user as { profile?: { name?: string } }).profile?.name,
+      };
     },
 
     async contact(message) {
@@ -271,6 +337,21 @@ function createLocalBackend(): Backend {
   return {
     isLive: false,
     passwordMinLength: PASSWORD_MIN,
+    // There is no provider to talk to without a backend, and an offered
+    // Google button that cannot work is worse than no button.
+    oauthProviders: [],
+
+    async completeApplication() {
+      throw new Error("Third-party sign-in needs the live backend.");
+    },
+
+    async startOAuth() {
+      throw new Error("Third-party sign-in needs the live backend.");
+    },
+
+    async pendingAccount() {
+      return null;
+    },
 
     async apply(application) {
       const members = read<Member[]>(KEY_MEMBERS, []);

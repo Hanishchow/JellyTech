@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Masthead, Page, Section, Note } from "@/components/layout/editorial";
-import { backend, type Member } from "@/lib/backend";
+import { backend, type Member, type PendingAccount } from "@/lib/backend";
 
 function Row({ term, children }: { term: string; children: React.ReactNode }) {
   return (
@@ -17,6 +17,7 @@ function Row({ term, children }: { term: string; children: React.ReactNode }) {
 export function DashboardPage() {
   const navigate = useNavigate();
   const [member, setMember] = useState<Member | null>(null);
+  const [pending, setPending] = useState<PendingAccount | null>(null);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -26,10 +27,12 @@ export function DashboardPage() {
     let cancelled = false;
     backend
       .currentMember()
-      .then((found) => {
+      .then(async (found) => {
         if (cancelled) return;
         setMember(found);
-        setChecked(true);
+        // Arriving from Google: authenticated, but the club has no record yet.
+        if (!found) setPending(await backend.pendingAccount());
+        if (!cancelled) setChecked(true);
       })
       .catch(() => {
         if (!cancelled) setChecked(true);
@@ -40,6 +43,27 @@ export function DashboardPage() {
   }, []);
 
   if (!checked) return null;
+
+  if (!member && pending) {
+    return (
+      <Page>
+        <Masthead
+          eyebrow="Members"
+          title="One step left"
+          standfirst={`Signed in as ${pending.email}. The club has no membership record against this account yet.`}
+        />
+        <Section>
+          <p className="measure border-t border-rule pt-10 text-ink-muted">
+            <Link to="/join" className="text-glow-bright underline underline-offset-4">
+              Finish the application
+            </Link>{" "}
+            and this page becomes your membership record. It takes a minute: the
+            department, year and which teams interest you.
+          </p>
+        </Section>
+      </Page>
+    );
+  }
 
   if (!member) {
     return (
