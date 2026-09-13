@@ -20,11 +20,11 @@ import { asset } from "@/lib/asset";
  * untouched.
  */
 const SCRIPTS = [
-  "lab/medusae/lib/three/three.js",
-  "lab/medusae/libs.develop.js",
-  "lab/medusae/shader-chunks.develop.js",
-  "lab/medusae/shaders.develop.js",
-  "lab/medusae/app.develop.js",
+  "static/medusae/lib/three/three.js",
+  "static/medusae/libs.develop.js",
+  "static/medusae/shader-chunks.develop.js",
+  "static/medusae/shaders.develop.js",
+  "static/medusae/app.develop.js",
 ];
 
 declare global {

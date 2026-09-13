@@ -3,12 +3,17 @@
 import { useEffect } from "react";
 import { asset } from "@/lib/asset";
 
-// What the hero actually needs before it can be revealed. This used to warm
-// the five vendored medusae scripts; the hero no longer loads any of them, so
-// preloading them meant fetching ~650KB of JavaScript that nothing executes.
-// The emblem is now the one asset worth having in cache when the curtain goes
-// up, since it is the first thing on screen.
-const HERO_ASSETS = [asset("static/img/emblem-512.png")];
+// What the hero needs before the curtain goes up. The medusae scripts are back
+// on this list because the hero loads them again, and the loading screen exists
+// precisely to cover their download and shader compile: reveal without warming
+// them and the reader watches a black rectangle instead.
+const HERO_ASSETS = [
+  asset("static/medusae/lib/three/three.js"),
+  asset("static/medusae/libs.develop.js"),
+  asset("static/medusae/shader-chunks.develop.js"),
+  asset("static/medusae/shaders.develop.js"),
+  asset("static/medusae/app.develop.js"),
+];
 
 interface TetrisLoaderProps {
   minMs?: number;
