@@ -1,18 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { asset } from "@/lib/asset";
 
-// The jellyfish hero boots by injecting these scripts on mount. Preloading all
-// of them during the loading screen warms the HTTP cache so the hero reveals
-// into an already-running simulation instead of a blank canvas.
-const HERO_ASSETS = [
-  "/static/css/style.css",
-  "/static/lib/three/three.js",
-  "/static/js/libs.develop.js",
-  "/static/js/shader-chunks.develop.js",
-  "/static/js/shaders.develop.js",
-  "/static/js/app.develop.js",
-];
+// What the hero actually needs before it can be revealed. This used to warm
+// the five vendored medusae scripts; the hero no longer loads any of them, so
+// preloading them meant fetching ~650KB of JavaScript that nothing executes.
+// The emblem is now the one asset worth having in cache when the curtain goes
+// up, since it is the first thing on screen.
+const HERO_ASSETS = [asset("static/img/emblem-512.png")];
 
 interface TetrisLoaderProps {
   minMs?: number;
@@ -26,7 +22,11 @@ function preloadAsset(url: string, onDone: () => void) {
   }
   const link = document.createElement("link");
   link.rel = "preload";
-  link.as = url.endsWith(".css") ? "style" : "script";
+  link.as = url.endsWith(".css")
+    ? "style"
+    : /\.(png|jpe?g|webp|avif|svg)$/.test(url)
+      ? "image"
+      : "script";
   link.href = url;
   link.onload = () => onDone();
   link.onerror = () => onDone();
@@ -70,7 +70,6 @@ export function TetrisLoader({ minMs = 4000, onComplete }: TetrisLoaderProps) {
       // and never drags past ~minMs (clamp on elapsed). The tetris line clears
       // exactly at 100.
       const p = Math.max(shareElapsed, shareAssets * 0.9);
-      screen.style.setProperty("--p", String(p));
       if (pctEl) pctEl.textContent = String(Math.round(p * 100)).padStart(3, "0");
       if (barEl) barEl.style.width = `${p * 100}%`;
       if (p >= 1) {

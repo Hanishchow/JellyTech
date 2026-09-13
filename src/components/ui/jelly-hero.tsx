@@ -1,117 +1,57 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ArrowDown } from "lucide-react";
+import { createJellyField } from "@/components/ui/jelly-field";
+import { asset } from "@/lib/asset";
 
+/**
+ * The hero. A canvas of drifting jellyfish, the emblem, and nothing else:
+ * whatever the site has to say begins under the fold.
+ *
+ * The old implementation loaded five vendored scripts and a WebGL simulation
+ * that never rendered on this machine. This one is a single module with no
+ * dependencies, no shaders and no physics. See jelly-field.ts for why.
+ */
 export function JellyHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const scripts = [
-      "/static/lib/three/three.js",
-      "/static/js/libs.develop.js",
-      "/static/js/shader-chunks.develop.js",
-      "/static/js/shaders.develop.js",
-      "/static/js/app.develop.js",
-    ];
-
-    let cancelled = false;
-    let chain: Promise<void> = Promise.resolve();
-
-    for (const src of scripts) {
-      chain = chain.then(
-        () =>
-          new Promise<void>((resolve) => {
-            if (cancelled) {
-              resolve();
-              return;
-            }
-            const script = document.createElement("script");
-            script.src = src;
-            script.async = true;
-            script.onload = () => resolve();
-            script.onerror = () => resolve();
-            document.body.appendChild(script);
-          })
-      );
-    }
-
-    return () => {
-      cancelled = true;
-      document
-        .querySelectorAll(
-          'script[src^="/static/"]'
-        )
-        .forEach((el) => el.remove());
-    };
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const field = createJellyField(canvas, { count: 6 });
+    return () => field.destroy();
   }, []);
 
   return (
-    <section
-      ref={containerRef}
-      className={cn(
-        "relative min-h-screen w-full flex items-center justify-center overflow-hidden",
-        "bg-[#0a0a0a]"
-      )}
-      id="jellyfish-container"
-    >
+    <section className="relative min-h-[100dvh] w-full overflow-hidden bg-ground-deep">
       <canvas
         ref={canvasRef}
-        id="canvas"
-        className="fixed inset-0 w-full h-full z-0"
-        style={{ width: "100%", height: "100%", display: "block" }}
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full"
       />
 
-      <div id="info" className="hidden" aria-hidden="true" />
-      <div id="cover-info" className="hidden" aria-hidden="true" />
-      <div id="container-controls" className="hidden" aria-hidden="true" />
-      <div id="container-stats" className="hidden" aria-hidden="true" />
+      {/* A bloom from the floor of the hero, so the field sits in water rather
+          than on a flat black rectangle, and the section below it is entered
+          rather than cut to. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(70% 50% at 50% 108%, rgb(var(--glow) / 0.28), transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-ground"
+      />
 
-      <div className="relative z-10 flex flex-col items-center justify-center px-4 py-20 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="space-y-6 max-w-3xl"
-        >
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white">
-            JELLYTECH
-          </h1>
-          <p className="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto leading-relaxed">
-            Biotechnology, Life Sciences &amp; Scientific Engagement Club
-          </p>
-          <p className="text-white/55 max-w-2xl mx-auto leading-relaxed">
-            A student-led scientific ecosystem at Acharya Institute of Technology —
-            connecting biotech education with research, industry, innovation and
-            scientific communication.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto">
-              <Link to="/signup">Join the Movement</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 w-full sm:w-auto">
-              <Link to="/login">Log In</Link>
-            </Button>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 1 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce"
-        >
-          <ArrowDown className="h-8 w-8 text-white/50" />
-        </motion.div>
-      </div>
+      <img
+        src={asset("static/img/emblem-512.png")}
+        alt="JELLYTECH"
+        className="absolute left-1/2 top-1/2 w-[min(46vw,30rem)] -translate-x-1/2 -translate-y-1/2 opacity-95"
+        style={{ filter: "drop-shadow(0 0 60px rgb(var(--glow) / 0.55))" }}
+      />
     </section>
   );
 }

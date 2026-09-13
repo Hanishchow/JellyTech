@@ -3668,12 +3668,66 @@ MainScene.prototype.render = function (delta, stepProgress) {
 };
 
 
-setTimeout(function setup() {
-  var DEBUG = true;
-  if (DEBUG && location.search.indexOf('test=true') > -1) {
-    App.run('tests');
-  } else {
-    App.run('index');
-    App.log('Particulate.js ' + Particulate.VERSION);
+/* ---- JellyTech: background-only controller ----
+
+   Upstream's `index` controller wires the demo's whole control panel — the
+   dots/postfx/sim/audio/colours toggles, the info modal, the particle
+   counters — and every one of those components dereferences its element
+   unconditionally, so on a page that does not carry that markup the very
+   first ToggleComponent throws and the sim never starts.
+
+   Here the medusae are wallpaper, not a demo, so this is the same scene setup
+   with the UI removed. It is also start/stop-able rather than a one-shot
+   boot: the hero is a route, and a visitor who leaves it and comes back would
+   otherwise return to a dead canvas, because the scripts only ever evaluate
+   once. Each stop releases the WebGL context outright — browsers cap how many
+   are live at a time, and a few round trips through the route is enough to
+   exhaust that budget if the old ones are merely dropped.
+   ---------------------------------------------------------------------- */
+App.startBackground = function () {
+  if (App.scene) { return App.scene; }
+
+  /* A machine with no WebGL — or a browser that has run out of live contexts —
+     throws somewhere inside the renderer rather than returning anything we can
+     test. The hero is decorative, so a failure here must leave the page intact
+     with its own dark ground rather than taking the mount down with it. */
+  var scene;
+  try {
+    scene = App.MainScene.create();
+    scene.initItems();
+    scene.initForces();
+    scene.appendRenderer();
+  } catch (err) {
+    App.log('medusae: scene unavailable — ' + err.message);
+    App.scene = null;
+    return null;
   }
-}, 0);
+
+  App.scene = scene;
+  scene.loop.start();
+
+  return scene;
+};
+
+App.stopBackground = function () {
+  var scene = App.scene;
+  if (!scene) { return; }
+  App.scene = null;
+
+  scene.loop.stop();
+
+  var canvas = scene.renderer.domElement;
+  var gl = scene.renderer.getContext();
+  var lose = gl && gl.getExtension('WEBGL_lose_context');
+
+  scene.renderer.dispose();
+  if (lose) { lose.loseContext(); }
+  if (canvas.parentNode) { canvas.parentNode.removeChild(canvas); }
+};
+
+/* No auto-boot. Upstream started itself on a timer because the script and its
+   page shipped together; here the hero is one route among many, so React owns
+   when the scene starts and stops. */
+if (location.search.indexOf('test=true') > -1) {
+  setTimeout(function () { App.run('tests'); }, 0);
+}

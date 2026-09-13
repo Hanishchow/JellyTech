@@ -2,38 +2,188 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================================================
+   JELLYTECH — bioluminescence
+
+   The brand is a violet jellyfish glowing in black water, so the site is black
+   water. Not a light page with a dark hero bolted on: one ground, top to
+   bottom, and the emblem, the background simulation and the type all lit by the
+   same colour.
+
+   COLOUR. `--glow` is lifted straight out of the emblem's own drop-shadow
+   filter (`0.615 0.306 0.867` = #9D4EDD), so nothing here is a guess at the
+   brand. It measures 4.35:1 on the ground, which is fine for rules, fills and
+   display type but short of AA for small text, so anything under ~18px uses
+   `--glow-bright` (#C77DFF, 7.4:1) instead. That split is the whole reason
+   there are two violets and not one.
+
+   TYPE. The previous pass set a 16px body under a 3rem headline in a text
+   serif, which is the proportion of a document. This one is built the other
+   way round: display sizes that take the full width of the measure, an 18px
+   body, and Bricolage Grotesque at 800 carrying every heading. Its optical-size
+   axis means a 160px headline is drawn as a different shape from a 20px
+   subhead rather than one outline scaled up, which is what keeps weight this
+   heavy from going muddy. Martian Mono sets labels: very wide, very technical,
+   and at label sizes that width is the point.
+   ============================================================================= */
+
 @layer base {
   :root {
-    --background: 10 10 10;
-    --foreground: 237 237 237;
-    --primary: 126 231 245;
-    --primary-foreground: 10 10 10;
-    --secondary: 26 26 46;
-    --secondary-foreground: 237 237 237;
-    --muted: 26 26 46;
-    --muted-foreground: 160 160 176;
-    --accent: 26 26 46;
-    --accent-foreground: 237 237 237;
-    --destructive: 239 68 68;
-    --destructive-foreground: 237 237 237;
-    --border: 42 42 62;
-    --input: 42 42 62;
-    --ring: 126 231 245;
-    --radius: 0.5rem;
-  }
+    /* black water, with a violet cast rather than a neutral grey one */
+    --ground: 7 5 12;
+    --ground-raised: 18 13 30;
+    --ground-deep: 3 2 6;
 
-  .dark {
-    --background: 10 10 10;
-    --foreground: 237 237 237;
+    --ink: 240 235 250;
+    --ink-muted: 168 160 190;
+    --ink-faint: 118 110 142;
+    --rule: 48 38 72;
+
+    /* the emblem's own violet */
+    --glow: 157 78 221;
+    --glow-bright: 199 125 255;
+    --glow-deep: 90 24 154;
+
+    --accent: var(--glow);
+
+    /* Rationed. Marks things that have not happened yet, and nothing else. */
+    --signal: 255 138 76;
+
+    --font-display: "Bricolage Grotesque", "Archivo", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "Martian Mono", ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, monospace;
+
+    --radius: 2px;
+
+    /* shadcn-era aliases, kept so the primitives in components/ui keep working */
+    --background: var(--ground);
+    --foreground: var(--ink);
+    --primary: var(--glow);
+    --primary-foreground: 255 255 255;
+    --secondary: var(--ground-raised);
+    --secondary-foreground: var(--ink);
+    --muted: var(--ground-raised);
+    --muted-foreground: var(--ink-muted);
+    --accent-foreground: 255 255 255;
+    --destructive: var(--signal);
+    --destructive-foreground: 10 6 16;
+    --border: var(--rule);
+    --input: var(--rule);
+    --ring: var(--glow-bright);
   }
 
   * {
-    border-color: rgb(var(--border));
+    border-color: rgb(var(--rule));
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    background-color: rgb(var(--ground));
+    color-scheme: dark;
   }
 
   body {
-    background-color: rgb(var(--background));
-    color: rgb(var(--foreground));
+    background-color: rgb(var(--ground));
+    color: rgb(var(--ink));
     font-family: var(--font-sans);
+    font-size: 18px;
+    line-height: 1.55;
   }
+
+  /* Tight tracking and a hard leading are what stop a big grotesque from
+     looking merely large. */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+    color: rgb(var(--ink));
+    text-wrap: balance;
+  }
+
+  h3, h4 {
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: rgb(var(--glow) / 0.35);
+    color: rgb(var(--ink));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--glow-bright));
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /* A running measure for body copy. At 18px this lands near 640px, which is
+     what a line of Instrument Sans wants before the return sweep suffers. */
+  .measure {
+    max-width: 58ch;
+  }
+
+  /* Metadata: the mono label above a section or beside a field. Always the
+     bright violet, never the brand one: at 11px the brand violet measures
+     4.35:1 on the ground and fails AA. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--glow-bright));
+  }
+
+  .label--signal {
+    color: rgb(var(--signal));
+  }
+
+  /* Bioluminescence, for the two or three things per page that should look lit
+     rather than printed. Text-shadow rather than a filter: a filter on text
+     forces a new layer and blurs the glyph edges along with the halo. */
+  .lit {
+    color: rgb(var(--glow-bright));
+    text-shadow:
+      0 0 18px rgb(var(--glow) / 0.55),
+      0 0 46px rgb(var(--glow) / 0.3);
+  }
+
+  /* The same idea for a box: a soft violet bloom pushed outside the edge. */
+  .lit-edge {
+    box-shadow:
+      0 0 0 1px rgb(var(--glow) / 0.35),
+      0 0 34px -6px rgb(var(--glow) / 0.45);
+  }
+}
+
+/* =============================================================================
+   SUB-PAGE GROUND — swap this block for the gradient sheet.
+
+   The jellyfish is the home page's job alone. Every other page sits on this
+   ground instead, and it is deliberately one rule in one place: drop the
+   gradient in here and every sub-page picks it up, with no page component
+   touching a background of its own.
+
+   What is here now is black water with a violet bloom rising from the bottom
+   of the viewport, so a sub-page still reads as the same ocean the home page
+   opens in.
+   ============================================================================= */
+
+.page-ground {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      120% 80% at 50% 118%,
+      rgb(var(--glow) / 0.22) 0%,
+      rgb(var(--glow) / 0.06) 38%,
+      transparent 68%
+    ),
+    rgb(var(--ground));
 }

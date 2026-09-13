@@ -1,39 +1,24 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PageShell } from "@/components/page-shell";
-import { PageSection } from "@/components/page-section";
-import { Link } from "react-router-dom";
-import {
-  CornerDownRight,
-  GraduationCap,
-  Users,
-  Megaphone,
-  Video,
-  PenTool,
-  Trophy,
-  Truck,
-  Wallet,
-  ArrowRight,
-} from "lucide-react";
+import { Masthead, Page, Section, Index, Plates, Note } from "@/components/layout/editorial";
+import { HeroCarousel, type HeroCarouselItem } from "@/components/ui/hero-carousel";
+import { plate } from "@/lib/imagery";
 
-const teamRoles = [
+const ROLES = [
   {
     title: "Club Head / President",
-    between: "The primary student leader — sets direction, delegates and ensures accountability.",
-    icon: CornerDownRight,
-    responsibilities: [
+    summary: "The primary student leader: sets direction, delegates, and is accountable for the club as a whole.",
+    duties: [
       "Establish the strategic direction of the club",
       "Coordinate all functional teams",
       "Represent the club before faculty and college authorities",
-      "Ensure teams operate independently while aligned",
+      "Ensure teams operate independently while staying aligned",
     ],
   },
   {
     title: "Student Welfare, Conferences & Outreach",
-    icon: Megaphone,
-    responsibilities: [
+    summary: "Finds the opportunities everything else is built on.",
+    duties: [
       "Research conferences and scientific events",
       "Prepare summaries of relevant opportunities",
       "Coordinate student participation and permissions",
@@ -42,8 +27,8 @@ const teamRoles = [
   },
   {
     title: "Alumni Team",
-    icon: GraduationCap,
-    responsibilities: [
+    summary: "Builds the standing network the club draws speakers and mentors from.",
+    duties: [
       "Identify and contact biotechnology alumni",
       "Maintain an alumni contact database",
       "Invite alumni for talks, mentorship and podcasts",
@@ -52,8 +37,8 @@ const teamRoles = [
   },
   {
     title: "Cultural & Engagement Team",
-    icon: Users,
-    responsibilities: [
+    summary: "Makes sure opportunities reach students who would not otherwise hear about them.",
+    duties: [
       "Conduct classroom campaigns across AIT",
       "Democratize access to scientific activities",
       "Encourage first-year and cross-department participation",
@@ -62,8 +47,8 @@ const teamRoles = [
   },
   {
     title: "Media Team",
-    icon: Video,
-    responsibilities: [
+    summary: "Records what happens, so it exists after the day it happened.",
+    duties: [
       "Photograph and record events",
       "Produce short-form videos and reels",
       "Document meetings and external coverage",
@@ -72,8 +57,8 @@ const teamRoles = [
   },
   {
     title: "Editorial & Design Team",
-    icon: PenTool,
-    responsibilities: [
+    summary: "Turns the record into something readable, and keeps the club's visual voice consistent.",
+    duties: [
       "Graphic design, website and posters",
       "Blogs, explainers and event reports",
       "Magazine and digital publications",
@@ -82,8 +67,8 @@ const teamRoles = [
   },
   {
     title: "Hackathons & Technical Activities",
-    icon: Trophy,
-    responsibilities: [
+    summary: "The hands-on, competitive side of the club.",
+    duties: [
       "Research hackathons and competitions",
       "Identify biotechnology and interdisciplinary challenges",
       "Assemble student teams and document outcomes",
@@ -92,8 +77,8 @@ const teamRoles = [
   },
   {
     title: "Logistics & Transportation",
-    icon: Truck,
-    responsibilities: [
+    summary: "The part of an event nobody sees unless it goes wrong.",
+    duties: [
       "Transport arrangements and venue coordination",
       "Permissions, setup and equipment",
       "Registration desks and scheduling",
@@ -102,8 +87,8 @@ const teamRoles = [
   },
   {
     title: "Treasurer / Finance Team",
-    icon: Wallet,
-    responsibilities: [
+    summary: "Keeps the club solvent, documented and compliant.",
+    duties: [
       "Maintain financial records and budgets",
       "Track income and expenditure",
       "Prepare receipts, documentation and financial reports",
@@ -112,111 +97,119 @@ const teamRoles = [
   },
 ];
 
-const decisionLevels = [
-  {
-    level: "Level 1",
-    title: "Team decisions",
-    description: "Routine operational decisions within a team's own responsibilities.",
-    icon: Users,
-  },
-  {
-    level: "Level 2",
-    title: "Inter-team coordination",
-    description: "Team leads coordinate directly for multi-team activities without micromanagement.",
-    icon: CornerDownRight,
-  },
-  {
-    level: "Level 3",
-    title: "Executive decisions",
-    description: "Club Head and Core Team handle collaborations, representation and major programs.",
-    icon: Trophy,
-  },
-  {
-    level: "Level 4",
-    title: "Faculty approval",
-    description: "Faculty and college approval wherever required by institutional policy.",
-    icon: GraduationCap,
-  },
+const DECISIONS = [
+  { term: "Team decisions", detail: "Routine operational decisions within a team's own responsibilities. No approval needed." },
+  { term: "Inter-team coordination", detail: "Team leads coordinate directly for multi-team activities, without micromanagement from above." },
+  { term: "Executive decisions", detail: "Club Head and Core Team handle collaborations, external representation and major programs." },
+  { term: "Faculty approval", detail: "Faculty and college approval wherever institutional policy requires it." },
 ];
+
+const FINANCE = [
+  { term: "Approved institutional funding", detail: "Institutional allocations, approved event funding and other officially authorized sources." },
+  { term: "Approval & documentation", detail: "Every transaction is documented: budgets, receipts and expenditure all follow college regulations." },
+  { term: "Regulatory compliance", detail: "No personal collection or unauthorized financial commitment is ever made on behalf of the club." },
+  { term: "Sponsorships & collaborations", detail: "Sought only where permitted, and always through the proper approval mechanisms." },
+];
+
+/* One hue per team, walked around a cool marine range so the backdrop swings on
+   every change without ever leaving the site's palette. */
+const ACCENTS = [
+  "#21476e", "#2f6d7a", "#3a5f9e", "#4a4f8c", "#2b7a6b",
+  "#5a4a86", "#1f5f8b", "#3d6b5a", "#46527f",
+];
+
+/** Break a team name into two roughly equal lines, since the carousel sets each
+    line as its own reveal and one long trailing line reads badly. */
+function twoLines(title: string) {
+  const words = title.split(" ");
+  const at = Math.ceil(words.length / 2);
+  return [words.slice(0, at).join(" "), words.slice(at).join(" ")].join("\n");
+}
+
+/* The nine teams as a filmstrip. Deliberately not portraits: the founding team
+   has not been appointed, and a row of stock faces standing in for real students
+   would be a lie the rest of the page then has to live with. Each card carries
+   its team's remit instead, and the strip takes real photographs the moment the
+   Media team has them. */
+const STRIP: HeroCarouselItem[] = ROLES.map((role, i) => ({
+  id: role.title,
+  title: twoLines(role.title),
+  image: plate(i),
+  accent: ACCENTS[i % ACCENTS.length],
+}));
 
 export function TeamPage() {
   return (
-    <PageShell
-      badge="Team"
-      title="Our Team"
-      subtitle="Centralized enough to keep direction, decentralized enough that teams make decisions independently. Leadership transfers are structured — every team maintains SOPs, documents and contacts so the club survives any change in student leadership."
-    >
-      <PageSection title="Organization structure">
-        <div className="flex flex-wrap items-center justify-start gap-2 text-sm">
-          {["Faculty Advisor / Coordinator", "Club Head / President", "Core Executive Team", "Functional Teams"].map((level, i) => (
-            <span key={level} className="flex items-center gap-2">
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/70">
-                {level}
-              </span>
-              {i < 3 && <span className="text-white/20">↓</span>}
-            </span>
+    <Page>
+      <Masthead
+        eyebrow="Team & governance"
+        title="Centralized enough to hold direction"
+        standfirst="Decentralized enough that teams decide for themselves. Leadership transfers are structured: every team maintains its own procedures, documents and contacts, so the club survives any change in student leadership."
+      />
+
+      <Section title="The nine teams" intro="Drag the strip, or use the arrow keys.">
+        <div className="pt-2">
+          <HeroCarousel
+            items={STRIP}
+            defaultIndex={0}
+            autoplay
+            autoplayDelay={5200}
+            className="h-[75dvh] min-h-[26rem]"
+          />
+        </div>
+      </Section>
+
+      <Section title="What each team does" intro="Nine roles. Each operates independently within its own remit and coordinates directly with the others.">
+        <div className="border-t border-rule">
+          {ROLES.map((role, i) => (
+            <article
+              key={role.title}
+              className="grid gap-4 border-b border-rule py-8 md:grid-cols-[4rem_20rem_1fr] md:gap-8"
+            >
+              <span className="label pt-2">{String(i + 1).padStart(2, "0")}</span>
+              <div>
+                <h3 className="font-display text-lg leading-snug">{role.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                  {role.summary}
+                </p>
+              </div>
+              <ul className="space-y-1.5 text-sm text-ink-muted">
+                {role.duties.map((duty) => (
+                  <li key={duty} className="flex gap-3">
+                    {/* A hairline rather than a glyph: a dash or a coloured dot
+                        in front of every row is decoration, and it repeats 36
+                        times on this page. */}
+                    <span
+                      className="mt-2.5 h-px w-3 flex-none bg-glow/60"
+                      aria-hidden="true"
+                    />
+                    <span>{duty}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
           ))}
         </div>
-      </PageSection>
+      </Section>
 
-      <PageSection title="Roles & responsibilities">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {teamRoles.map((role) => (
-            <Card key={role.title} className="bg-zinc-900/80 border-white/10">
-              <CardContent className="p-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <role.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-white">{role.title}</h3>
-                </div>
-                {role.between && (
-                  <p className="text-sm text-white/55">{role.between}</p>
-                )}
-                <ul className="space-y-1.5">
-                  {role.responsibilities.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-white/65 leading-relaxed">
-                      <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-primary/70" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </PageSection>
+      <Section
+        title="How decisions are made"
+        intro="Four levels, so that routine work never waits on an approval it does not need."
+      >
+        <Index items={DECISIONS} />
+      </Section>
 
-      <PageSection title="Decision-making structure">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {decisionLevels.map((item) => (
-            <Card key={item.level} className="bg-zinc-900/80 border-white/10">
-              <CardContent className="p-5 space-y-3">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <item.icon className="h-5 w-5 text-primary" />
-                </div>
-                <p className="text-xs uppercase tracking-wider text-primary">{item.level}</p>
-                <h3 className="font-medium text-white">{item.title}</h3>
-                <p className="text-sm text-white/55 leading-relaxed">{item.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </PageSection>
+      <Section title="Finance &amp; compliance" intro="The club is non-commercial. Everything it spends is institutional money, handled as such.">
+        <Plates items={FINANCE} columns={2} />
+      </Section>
 
-      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center space-y-4">
-        <h2 className="text-xl font-semibold text-white">Want to build the club with us?</h2>
-        <p className="mx-auto max-w-xl text-sm text-white/60 leading-relaxed">
-          Roles are open to students from every department. The club prioritizes early
-          talent identification — first-years are groomed through mentorship and
-          meaningful responsibility so the next batch can carry the club forward.
-        </p>
-        <Button asChild>
-          <Link to="/signup">
-            Join the Movement <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
-    </PageShell>
+      <Section title="The people">
+        <Note>
+          The founding team is being constituted. Names, photographs and contact
+          details for each role will be published here once appointments are
+          confirmed by faculty.
+        </Note>
+      </Section>
+    </Page>
   );
 }
