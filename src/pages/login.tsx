@@ -4,11 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { BrowserWindow } from "@/components/ui/mock-browser-window";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -19,6 +19,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -33,7 +34,7 @@ export function LoginPage() {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     console.log("Login:", data);
     setIsLoading(false);
-    window.location.href = "/dashboard";
+    navigate("/dashboard");
   };
 
   return (
@@ -47,14 +48,21 @@ export function LoginPage() {
           <p className="text-white/60 mt-2">Sign in to your account to continue</p>
         </div>
 
-        <Card className="bg-zinc-900/80 border-white/10 backdrop-blur-lg">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-white">Sign In</CardTitle>
-            <CardDescription className="text-white/60">
-              Enter your credentials to access your dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <BrowserWindow
+          size="md"
+          variant="chrome"
+          headerStyle="full"
+          url="jellytech.org/login"
+          className="!h-auto w-full"
+        >
+          <div className="p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Sign In</h2>
+              <p className="text-white/60 text-sm mt-1">
+                Enter your credentials to access your dashboard
+              </p>
+            </div>
+
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-white">
@@ -116,22 +124,23 @@ export function LoginPage() {
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4 border-t border-white/10">
+
             <p className="text-sm text-white/60 text-center">
               Don't have an account?{" "}
               <Link to="/signup" className="text-primary hover:underline font-medium">
                 Sign up
               </Link>
             </p>
-            <div className="relative w-full">
+
+            <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-zinc-900/80 px-4 text-white/50">Or continue with</span>
+                <span className="bg-zinc-800 px-4 text-white/50">Or continue with</span>
               </div>
             </div>
+
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" className="w-full bg-zinc-800 border-white/10 hover:bg-zinc-700">
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -146,8 +155,8 @@ export function LoginPage() {
                 Google
               </Button>
             </div>
-          </CardFooter>
-        </Card>
+          </div>
+        </BrowserWindow>
       </div>
     </div>
   );

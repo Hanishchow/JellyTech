@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,7 @@ type SignupForm = z.infer<typeof signupSchema>;
 
 export function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -39,7 +40,7 @@ export function SignupPage() {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     console.log("Signup:", data);
     setIsLoading(false);
-    window.location.href = "/dashboard";
+    navigate("/dashboard");
   };
 
   return (

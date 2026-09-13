@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,13 +15,42 @@ export function JellyHero() {
     const container = containerRef.current;
     if (!container) return;
 
-    const script = document.createElement("script");
-    script.src = "/static/js/app.develop.js";
-    script.async = true;
-    document.body.appendChild(script);
+    const scripts = [
+      "/static/lib/three/three.js",
+      "/static/js/libs.develop.js",
+      "/static/js/shader-chunks.develop.js",
+      "/static/js/shaders.develop.js",
+      "/static/js/app.develop.js",
+    ];
+
+    let cancelled = false;
+    let chain: Promise<void> = Promise.resolve();
+
+    for (const src of scripts) {
+      chain = chain.then(
+        () =>
+          new Promise<void>((resolve) => {
+            if (cancelled) {
+              resolve();
+              return;
+            }
+            const script = document.createElement("script");
+            script.src = src;
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = () => resolve();
+            document.body.appendChild(script);
+          })
+      );
+    }
 
     return () => {
-      document.body.removeChild(script);
+      cancelled = true;
+      document
+        .querySelectorAll(
+          'script[src^="/static/"]'
+        )
+        .forEach((el) => el.remove());
     };
   }, []);
 
@@ -60,10 +90,10 @@ export function JellyHero() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto">
-              <a href="/signup">Join the Movement</a>
+              <Link to="/signup">Join the Movement</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 w-full sm:w-auto">
-              <a href="/login">Log In</a>
+              <Link to="/login">Log In</Link>
             </Button>
           </div>
         </motion.div>
