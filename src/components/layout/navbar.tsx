@@ -57,7 +57,7 @@ export function Navbar() {
             style={{ filter: "drop-shadow(0 0 10px rgb(var(--glow) / 0.6))" }}
           />
           <span className="font-display text-xl font-extrabold tracking-tight">
-            JELLYTECH
+            JellyTech
           </span>
         </Link>
 

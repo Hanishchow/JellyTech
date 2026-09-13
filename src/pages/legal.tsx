@@ -17,7 +17,7 @@ export function PrivacyPage() {
       <Masthead
         eyebrow="Privacy"
         title="What this site collects"
-        standfirst="JELLYTECH is a non-commercial student club. The site collects the minimum it needs to process a membership application and nothing else."
+        standfirst="JellyTech is a non-commercial student club. The site collects the minimum it needs to process a membership application and nothing else."
       />
       <Section>
         <div className="border-t border-rule">
@@ -73,7 +73,7 @@ export function TermsPage() {
         <div className="border-t border-rule">
           <Clause title="Nature of the club">
             <p>
-              JELLYTECH is a student-led, faculty-supervised, non-commercial
+              JellyTech is a student-led, faculty-supervised, non-commercial
               co-curricular organization. It does not sell goods or services, and
               it makes no financial commitment on behalf of the institute.
             </p>

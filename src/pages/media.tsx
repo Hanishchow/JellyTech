@@ -49,7 +49,7 @@ export function MediaPage() {
 
       <Section
         title="Plasmid Podcast"
-        intro="The campus science podcast: conversations with researchers, alumni, faculty and students, produced and hosted by JELLYTECH members."
+        intro="The campus science podcast: conversations with researchers, alumni, faculty and students, produced and hosted by JellyTech members."
       >
         <Plates items={PODCAST} columns={2} />
         <div className="mt-10">

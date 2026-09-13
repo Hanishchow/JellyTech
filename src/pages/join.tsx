@@ -99,7 +99,7 @@ export function JoinPage() {
       <Masthead
         eyebrow="Join"
         title="Open to every department"
-        standfirst="JELLYTECH is a co-curricular club, not a course. Tell us who you are and which side of the work interests you, and the Cultural & Engagement team will be in touch when the founding intake opens."
+        standfirst="JellyTech is a co-curricular club, not a course. Tell us who you are and which side of the work interests you, and the Cultural & Engagement team will be in touch when the founding intake opens."
       />
 
       <Section title="Who it is for">

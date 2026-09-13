@@ -19,7 +19,7 @@
    this one.
    ============================================================================= */
 
-import { createClient } from "@insforge/sdk";
+import { insforge as sharedClient, rememberSession, forgetSession } from "@/lib/insforge";
 
 export type Department =
   | "Biotechnology"
@@ -173,8 +173,7 @@ function unwrap<T>(result: { data: T | null; error: unknown }, fallback: string)
   return result.data;
 }
 
-function createInsforgeBackend(baseUrl: string, anonKey: string): Backend {
-  const insforge = createClient({ baseUrl, anonKey });
+function createInsforgeBackend(insforge: NonNullable<typeof sharedClient>): Backend {
 
   async function memberFor(userId: string): Promise<Member | null> {
     const { data, error } = await insforge.database
@@ -222,6 +221,7 @@ function createInsforgeBackend(baseUrl: string, anonKey: string): Backend {
         name: application.name,
       });
       const account = unwrap(signUp, "Could not create the account.");
+      rememberSession(account.accessToken);
 
       const userId = account.user?.id;
       if (!userId) {
@@ -281,6 +281,7 @@ function createInsforgeBackend(baseUrl: string, anonKey: string): Backend {
         password,
       });
       const session = unwrap(result, "Could not sign in.");
+      rememberSession(session.accessToken);
 
       const userId = session.user?.id;
       if (!userId) throw new Error("Could not sign in.");
@@ -296,6 +297,7 @@ function createInsforgeBackend(baseUrl: string, anonKey: string): Backend {
 
     async signOut() {
       await insforge.auth.signOut();
+      forgetSession();
     },
 
     async currentMember() {
@@ -399,8 +401,6 @@ function createLocalBackend(): Backend {
   };
 }
 
-const url = import.meta.env.VITE_INSFORGE_URL;
-const anonKey = import.meta.env.VITE_INSFORGE_ANON_KEY;
-
-export const backend: Backend =
-  url && anonKey ? createInsforgeBackend(url, anonKey) : createLocalBackend();
+export const backend: Backend = sharedClient
+  ? createInsforgeBackend(sharedClient)
+  : createLocalBackend();

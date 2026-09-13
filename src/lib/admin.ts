@@ -14,17 +14,10 @@
    still be refused.
    ============================================================================= */
 
-import { createClient } from "@insforge/sdk";
 import type { Member, MemberStatus } from "@/lib/backend";
+import { configured, insforge as client } from "@/lib/insforge";
 
-const url = import.meta.env.VITE_INSFORGE_URL;
-const anonKey = import.meta.env.VITE_INSFORGE_ANON_KEY;
-
-export const adminAvailable = Boolean(url && anonKey);
-
-const client = adminAvailable
-  ? createClient({ baseUrl: url, anonKey })
-  : null;
+export const adminAvailable = configured;
 
 export interface Enquiry {
   id: string;

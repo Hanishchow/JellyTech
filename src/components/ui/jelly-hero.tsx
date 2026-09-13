@@ -48,7 +48,7 @@ export function JellyHero() {
 
       <img
         src={asset("static/img/emblem-512.png")}
-        alt="JELLYTECH"
+        alt="JellyTech"
         className="absolute left-1/2 top-1/2 w-[min(46vw,30rem)] -translate-x-1/2 -translate-y-1/2 opacity-95"
         style={{ filter: "drop-shadow(0 0 60px rgb(var(--glow) / 0.55))" }}
       />

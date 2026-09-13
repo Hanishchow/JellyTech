@@ -37,7 +37,7 @@ const MISSION = [
 ];
 
 const CONVENTIONAL = ["Workshop", "Attendance", "Certificate", "Finished"];
-const JELLYTECH = [
+const JellyTech = [
   "Opportunity discovery",
   "Scientific exposure",
   "Student participation",
@@ -89,7 +89,7 @@ export function AboutPage() {
     <Page>
       <Masthead
         eyebrow="About"
-        title="What JELLYTECH is"
+        title="What JellyTech is"
         standfirst="A student-led, faculty-supervised, non-commercial co-curricular organization at Acharya Institute of Technology, building a continuous ecosystem of exposure, participation, creation and communication in biotechnology, life sciences and scientific engagement."
       />
 
@@ -144,8 +144,8 @@ export function AboutPage() {
             <Chain steps={CONVENTIONAL} muted />
           </div>
           <div>
-            <p className="label mb-5 text-glow-bright">JELLYTECH</p>
-            <Chain steps={JELLYTECH} />
+            <p className="label mb-5 text-glow-bright">JellyTech</p>
+            <Chain steps={JellyTech} />
           </div>
         </div>
       </Section>
@@ -156,7 +156,7 @@ export function AboutPage() {
 
       <Section>
         <Note>
-          JELLYTECH is in its founding year. Much of what is described here is a
+          JellyTech is in its founding year. Much of what is described here is a
           structure being put in place rather than a record of things already
           done. The pages across this site say which is which.
         </Note>

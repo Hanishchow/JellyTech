@@ -13,12 +13,7 @@
    calendar, not an error where the page used to be.
    ============================================================================= */
 
-import { createClient } from "@insforge/sdk";
-
-const url = import.meta.env.VITE_INSFORGE_URL;
-const anonKey = import.meta.env.VITE_INSFORGE_ANON_KEY;
-
-const client = url && anonKey ? createClient({ baseUrl: url, anonKey }) : null;
+import { insforge as client } from "@/lib/insforge";
 
 export interface PublishedOpportunity {
   id: string;

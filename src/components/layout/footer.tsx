@@ -40,7 +40,7 @@ export function Footer() {
 
       <div className="relative mx-auto max-w-page px-6 pb-16 pt-24">
         <p className="font-display text-mega leading-none text-ink">
-          JELLY<span className="text-glow">TECH</span>
+          Jelly<span className="text-glow">Tech</span>
         </p>
 
         <div className="mt-16 grid gap-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">

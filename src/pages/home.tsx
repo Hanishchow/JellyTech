@@ -35,7 +35,7 @@ const DIFFERENCE = [
   {
     term: "Not an event calendar",
     detail:
-      "The conventional model ends at Workshop → Attendance → Certificate → Finished. Every JELLYTECH activity is documented, communicated and fed into the next opportunity, so a year of work compounds instead of resetting.",
+      "The conventional model ends at Workshop → Attendance → Certificate → Finished. Every JellyTech activity is documented, communicated and fed into the next opportunity, so a year of work compounds instead of resetting.",
   },
   {
     term: "Biotechnology-led, AIT-wide",
@@ -59,7 +59,7 @@ export function HomePage() {
         <Section className="pt-28">
           <p className="label">Acharya Institute of Technology</p>
           <p className="measure mt-8 font-display text-[clamp(1.5rem,3vw,2.4rem)] leading-[1.25]">
-            JELLYTECH is a student-led, faculty-supervised club building a
+            JellyTech is a student-led, faculty-supervised club building a
             continuous ecosystem of scientific exposure, research engagement and
             science communication, where students do not merely consume
             scientific knowledge, but create, interpret and communicate it.

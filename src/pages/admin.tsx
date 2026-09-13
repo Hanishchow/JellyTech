@@ -80,7 +80,7 @@ export function AdminPage() {
   if (!allowed) {
     return (
       <Shell>
-        <h1 className="font-mono text-2xl uppercase tracking-[0.1em]">No access</h1>
+        <h1 className="font-mono text-2xl tracking-[0.1em]">No access</h1>
         <p className="mt-4 max-w-md text-[13px] leading-relaxed text-white/50">
           This account is not an administrator.{" "}
           <Link to="/login" className="text-white underline underline-offset-4">
@@ -97,9 +97,7 @@ export function AdminPage() {
   return (
     <Shell>
       <header className="flex flex-wrap items-baseline justify-between gap-4 border-b border-white/15 pb-4">
-        <h1 className="font-mono text-lg uppercase tracking-[0.16em]">
-          JELLYTECH · Admin
-        </h1>
+        <h1 className="font-mono text-lg tracking-[0.16em]">JellyTech · Admin</h1>
         <Link
           to="/"
           className="font-mono text-[11px] uppercase tracking-[0.1em] text-white/40 hover:text-white"
