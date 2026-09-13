@@ -9,12 +9,21 @@
    a beautiful piece of work and it was the wrong thing to put behind a club
    site. Two reasons, one of them fatal:
 
-   · It did not render. Its shaders fail to compile on ANGLE's D3D backend
-     ("HLSL compiler had an unexpected failure"), and there is no fallback: the
-     hero was simply black. A background nobody can see is not a background.
+   · It did not render. Its shaders failed to compile on ANGLE's D3D backend
+     ("HLSL compiler had an unexpected failure"), leaving the hero black.
    · The physics was never the point. Nothing on this page interacts with the
-     jellyfish, so simulating soft-body dynamics to produce a drifting silhouette
-     is paying for a capability the site never uses.
+     jellyfish, so simulating soft-body dynamics to produce a drifting
+     silhouette is paying for a capability the site never uses.
+
+   CORRECTION, 2026-09-13: the first reason was wrong. Upstream compiles and
+   runs perfectly well on this hardware. The failure that prompted this file was
+   measured while the browser had exhausted its WebGL contexts after repeated
+   reloads, and every context creation was failing, upstream's included. It was
+   a bad measurement read as a verdict.
+
+   Upstream is running at /lab/original, unmodified, for comparison. The second
+   reason still stands on its own, but it is a judgement about cost rather than
+   a defect, and it is the club's call to make, not this file's.
 
    So this draws the same subject with none of the machinery. No physics, no
    WebGL, no shader compilation, no dependencies. Canvas 2D, a handful of sine

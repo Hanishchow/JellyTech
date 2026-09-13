@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { TetrisLoader } from '@/components/ui/tetris-loader'
@@ -12,7 +12,20 @@ import { JoinPage } from '@/pages/join'
 import { LoginPage } from '@/pages/login'
 import { DashboardPage } from '@/pages/dashboard'
 import { PrivacyPage, TermsPage, NotFoundPage } from '@/pages/legal'
-import { AdminPage } from '@/pages/admin'
+
+/* The panel and the lab benches are split out of the main bundle. Three.js
+   alone is ~500KB, and it is imported by a route the public never opens;
+   leaving it in the entry chunk made every visitor download a 3D engine to
+   read the About page. */
+const AdminPage = lazy(() =>
+  import('@/pages/admin').then((m) => ({ default: m.AdminPage }))
+)
+const LabMedusaPage = lazy(() =>
+  import('@/pages/lab-medusa').then((m) => ({ default: m.LabMedusaPage }))
+)
+const LabOriginalPage = lazy(() =>
+  import('@/pages/lab-original').then((m) => ({ default: m.LabOriginalPage }))
+)
 
 /* The site used to be twenty-two routes across two dropdown menus, most of
    them a page-length description of something that had not happened yet. Those
@@ -60,13 +73,17 @@ export default function App() {
 
   /* The admin panel deliberately sits outside the site's chrome: no navbar, no
      footer, no loading screen, no jellyfish. It is a different room. */
-  if (pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/admin') || pathname.startsWith('/lab')) {
     return (
       <>
         <DismissLoader />
-        <Routes>
-          <Route path="/admin" element={<AdminPage />} />
-        </Routes>
+        <Suspense fallback={<div className="min-h-[100dvh] bg-ground" />}>
+          <Routes>
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/lab/medusa" element={<LabMedusaPage />} />
+            <Route path="/lab/original" element={<LabOriginalPage />} />
+          </Routes>
+        </Suspense>
       </>
     )
   }
