@@ -53,7 +53,7 @@ export function LoginPage() {
           variant="chrome"
           headerStyle="full"
           url="jellytech.org/login"
-          className="!h-auto w-full"
+          className="h-[580px] w-full"
         >
           <div className="p-6 space-y-6">
             <div>

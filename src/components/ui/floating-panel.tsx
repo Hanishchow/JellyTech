@@ -306,17 +306,20 @@ export function FloatingPanelLabel({
 interface FloatingPanelTextareaProps {
   className?: string
   id?: string
+  placeholder?: string
 }
 
 export function FloatingPanelTextarea({
   className,
   id,
+  placeholder,
 }: FloatingPanelTextareaProps) {
   const { note, setNote } = useFloatingPanel()
 
   return (
     <textarea
       id={id}
+      placeholder={placeholder}
       className={cn(
         "h-full w-full resize-none rounded-md bg-transparent px-4 py-3 text-sm outline-none",
         className
