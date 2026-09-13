@@ -20,8 +20,23 @@ export function DashboardPage() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    setMember(backend.currentMember());
-    setChecked(true);
+    // The live backend has to ask the server who this is, so the answer
+    // arrives a tick late; `checked` keeps the page from flashing the
+    // signed-out state at a member who is in fact signed in.
+    let cancelled = false;
+    backend
+      .currentMember()
+      .then((found) => {
+        if (cancelled) return;
+        setMember(found);
+        setChecked(true);
+      })
+      .catch(() => {
+        if (!cancelled) setChecked(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!checked) return null;
@@ -85,10 +100,9 @@ export function DashboardPage() {
 
       <Section title="What appears here next">
         <p className="measure border-t border-rule pt-10 text-ink-muted">
-          Once the club's backend is connected and the first activities run, this
-          page becomes the member's own record: opportunities they are eligible
-          for, activities they have attended, work they have published, and the
-          team they belong to.
+          As the first activities run, this page becomes the member's own
+          record: opportunities they are eligible for, activities they have
+          attended, work they have published, and the team they belong to.
         </p>
         {!backend.isLive && (
           <div className="mt-8">

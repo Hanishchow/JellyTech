@@ -44,6 +44,7 @@ export function JoinPage() {
       await backend.apply({
         name: String(data.get("name") ?? "").trim(),
         email: String(data.get("email") ?? "").trim().toLowerCase(),
+        password: String(data.get("password") ?? ""),
         usn: String(data.get("usn") ?? "").trim() || undefined,
         department: String(data.get("department")) as Department,
         year: String(data.get("year")),
@@ -75,7 +76,8 @@ export function JoinPage() {
             <p className="font-display text-heading">Application recorded.</p>
             <p className="measure mt-4 text-ink-muted">
               You will hear from the Cultural &amp; Engagement team once the
-              founding intake opens.
+              founding intake opens. Your account is active now, so you can sign
+              in to the member area any time.
             </p>
             {!backend.isLive && (
               <div className="mt-8">
@@ -103,6 +105,21 @@ export function JoinPage() {
                 <label className="block">
                   <span className="label">USN (optional)</span>
                   <input name="usn" className={cn(field, "mt-2")} />
+                </label>
+                <label className="block">
+                  <span className="label">
+                    Password ({backend.passwordMinLength}+ characters)
+                  </span>
+                  {/* Applying creates the member's account, which is what makes
+                      the member area mean anything later. */}
+                  <input
+                    name="password"
+                    type="password"
+                    required
+                    minLength={backend.passwordMinLength}
+                    autoComplete="new-password"
+                    className={cn(field, "mt-2")}
+                  />
                 </label>
                 <label className="block">
                   <span className="label">Year</span>

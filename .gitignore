@@ -11,3 +11,22 @@ build/
 .next/
 out/
 output.log
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf
+
+# Local env (publishable keys, but keep it out of the tree)
+.env
+.env.local
