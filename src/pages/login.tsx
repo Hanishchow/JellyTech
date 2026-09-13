@@ -45,7 +45,7 @@ export function LoginPage() {
             <span className="text-3xl font-bold text-white">JellyTech</span>
           </Link>
           <h1 className="text-3xl font-bold text-white">Welcome back</h1>
-          <p className="text-white/60 mt-2">Sign in to your account to continue</p>
+          <p className="text-white/60 mt-2">Sign in to the student-led scientific ecosystem of Acharya Institute of Technology</p>
         </div>
 
         <BrowserWindow

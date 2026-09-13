@@ -83,10 +83,15 @@ export function JellyHero() {
           className="space-y-6 max-w-3xl"
         >
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white">
-            JellyTech
+            JELLYTECH
           </h1>
           <p className="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto leading-relaxed">
-            The Editorial Wing of Bio Infinity Forum — Where Technology Meets Biology
+            Biotechnology, Life Sciences &amp; Scientific Engagement Club
+          </p>
+          <p className="text-white/55 max-w-2xl mx-auto leading-relaxed">
+            A student-led scientific ecosystem at Acharya Institute of Technology —
+            connecting biotech education with research, industry, innovation and
+            scientific communication.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto">

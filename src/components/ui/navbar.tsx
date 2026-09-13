@@ -19,70 +19,70 @@ const demoData = {
       title: "Home",
       url: "/",
     },
-    {
-      title: "Events",
-      url: "#",
-      items: [
-        {
-          title: "Upcoming Events",
-          description: "View all upcoming tech events and workshops",
-          icon: <Book className="size-5 shrink-0" />,
-          url: "/events/upcoming",
+{
+          title: "Events",
+          url: "#",
+          items: [
+            {
+              title: "Upcoming Events",
+              description: "View all upcoming biotech events and workshops",
+              icon: <Book className="size-5 shrink-0" />,
+              url: "/events/upcoming",
+            },
+            {
+              title: "Past Events",
+              description: "Browse our event history and recordings",
+              icon: <Trees className="size-5 shrink-0" />,
+              url: "/events/past",
+            },
+            {
+              title: "Speakers",
+              description: "Meet researchers, alumni and industry experts",
+              icon: <Sunset className="size-5 shrink-0" />,
+              url: "/events/speakers",
+            },
+            {
+              title: "Industry Visits",
+              description: "Institutional exposure and company visits",
+              icon: <Zap className="size-5 shrink-0" />,
+              url: "/events/visits",
+            },
+          ],
         },
         {
-          title: "Past Events",
-          description: "Browse our event history and recordings",
-          icon: <Trees className="size-5 shrink-0" />,
-          url: "/events/past",
+          title: "Research",
+          url: "#",
+          items: [
+            {
+              title: "Paper Presentations",
+              description: "Student research paper presentations",
+              icon: <Zap className="size-5 shrink-0" />,
+              url: "/research/papers",
+            },
+            {
+              title: "Research Updates",
+              description: "Latest research and opportunity news",
+              icon: <Sunset className="size-5 shrink-0" />,
+              url: "/research/updates",
+            },
+            {
+              title: "Publications",
+              description: "Published papers and articles",
+              icon: <Trees className="size-5 shrink-0" />,
+              url: "/research/publications",
+            },
+            {
+              title: "Collaborations",
+              description: "Industry, startup and academic connections",
+              icon: <Book className="size-5 shrink-0" />,
+              url: "/research/collaborations",
+            },
+          ],
         },
         {
-          title: "Speakers",
-          description: "Meet our distinguished speakers",
-          icon: <Sunset className="size-5 shrink-0" />,
-          url: "/events/speakers",
+          title: "Plasmid Podcast",
+          url: "/podcasts",
         },
-        {
-          title: "Industry Visits",
-          description: "Company visits and industry exposure programs",
-          icon: <Zap className="size-5 shrink-0" />,
-          url: "/events/visits",
-        },
-      ],
-    },
-    {
-      title: "Research",
-      url: "#",
-      items: [
-        {
-          title: "Paper Presentations",
-          description: "Student research paper presentations",
-          icon: <Zap className="size-5 shrink-0" />,
-          url: "/research/papers",
-        },
-        {
-          title: "Research Updates",
-          description: "Latest research news from Bio Infinity",
-          icon: <Sunset className="size-5 shrink-0" />,
-          url: "/research/updates",
-        },
-        {
-          title: "Publications",
-          description: "Published papers and articles",
-          icon: <Trees className="size-5 shrink-0" />,
-          url: "/research/publications",
-        },
-        {
-          title: "Collaborations",
-          description: "Industry and academic collaborations",
-          icon: <Book className="size-5 shrink-0" />,
-          url: "/research/collaborations",
-        },
-      ],
-    },
-    {
-      title: "Podcasts",
-      url: "/podcasts",
-    },
     {
       title: "Team",
       url: "/team",

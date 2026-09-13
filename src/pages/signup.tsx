@@ -51,7 +51,7 @@ export function SignupPage() {
             <span className="text-3xl font-bold text-white">JellyTech</span>
           </Link>
           <h1 className="text-3xl font-bold text-white">Create an account</h1>
-          <p className="text-white/60 mt-2">Join the JellyTech community today</p>
+          <p className="text-white/60 mt-2">Join the AIT-wide community bridging biotech education with research, industry and communication</p>
         </div>
 
         <BrowserWindow
