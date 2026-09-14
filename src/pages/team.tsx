@@ -1,102 +1,8 @@
 "use client";
 
 import { Masthead, Page, Section, Index, Plates } from "@/components/layout/editorial";
-import { HeroCarousel, type HeroCarouselItem } from "@/components/ui/hero-carousel";
 import { TeamSphere } from "@/components/ui/team-sphere";
-import { plate } from "@/lib/imagery";
-
-const ROLES = [
-  {
-    title: "Club Head / President",
-    summary: "The primary student leader: sets direction, delegates, and is accountable for the club as a whole.",
-    duties: [
-      "Establish the strategic direction of the club",
-      "Coordinate all functional teams",
-      "Represent the club before faculty and college authorities",
-      "Ensure teams operate independently while staying aligned",
-    ],
-  },
-  {
-    title: "Student Welfare, Conferences & Outreach",
-    summary: "Finds the opportunities everything else is built on.",
-    duties: [
-      "Research conferences and scientific events",
-      "Prepare summaries of relevant opportunities",
-      "Coordinate student participation and permissions",
-      "Maintain participation records",
-    ],
-  },
-  {
-    title: "Alumni Team",
-    summary: "Builds the standing network the club draws speakers and mentors from.",
-    duties: [
-      "Identify and contact biotechnology alumni",
-      "Maintain an alumni contact database",
-      "Invite alumni for talks, mentorship and podcasts",
-      "Build an institutional network, not last-minute speakers",
-    ],
-  },
-  {
-    title: "Cultural & Engagement Team",
-    summary: "Makes sure opportunities reach students who would not otherwise hear about them.",
-    duties: [
-      "Conduct classroom campaigns across AIT",
-      "Democratize access to scientific activities",
-      "Encourage first-year and cross-department participation",
-      "Coordinate student volunteers",
-    ],
-  },
-  {
-    title: "Media Team",
-    summary: "Records what happens, so it exists after the day it happened.",
-    duties: [
-      "Photograph and record events",
-      "Produce short-form videos and reels",
-      "Document meetings and external coverage",
-      "Maintain an organized, geotagged media archive",
-    ],
-  },
-  {
-    title: "Editorial & Design Team",
-    summary: "Turns the record into something readable, and keeps the club's visual voice consistent.",
-    duties: [
-      "Graphic design, website and posters",
-      "Blogs, explainers and event reports",
-      "Magazine and digital publications",
-      "Work closely with Media on every story",
-    ],
-  },
-  {
-    title: "Hackathons & Technical Activities",
-    summary: "The hands-on, competitive side of the club.",
-    duties: [
-      "Research hackathons and competitions",
-      "Identify biotechnology and interdisciplinary challenges",
-      "Assemble student teams and document outcomes",
-      "Develop internal hackathons where appropriate",
-    ],
-  },
-  {
-    title: "Logistics & Transportation",
-    summary: "The part of an event nobody sees unless it goes wrong.",
-    duties: [
-      "Transport arrangements and venue coordination",
-      "Permissions, setup and equipment",
-      "Registration desks and scheduling",
-      "External conference and visit logistics",
-    ],
-  },
-  {
-    title: "Treasurer / Finance Team",
-    summary: "Keeps the club solvent, documented and compliant.",
-    duties: [
-      "Maintain financial records and budgets",
-      "Track income and expenditure",
-      "Prepare receipts, documentation and financial reports",
-      "Ensure all expenditure follows institutional regulations",
-    ],
-  },
-];
+import { ROLES } from "@/lib/teams";
 
 const DECISIONS = [
   { term: "Team decisions", detail: "Routine operational decisions within a team's own responsibilities. No approval needed." },
@@ -112,33 +18,6 @@ const FINANCE = [
   { term: "Sponsorships & collaborations", detail: "Sought only where permitted, and always through the proper approval mechanisms." },
 ];
 
-/* One hue per team, walked around a cool marine range so the backdrop swings on
-   every change without ever leaving the site's palette. */
-const ACCENTS = [
-  "#21476e", "#2f6d7a", "#3a5f9e", "#4a4f8c", "#2b7a6b",
-  "#5a4a86", "#1f5f8b", "#3d6b5a", "#46527f",
-];
-
-/** Break a team name into two roughly equal lines, since the carousel sets each
-    line as its own reveal and one long trailing line reads badly. */
-function twoLines(title: string) {
-  const words = title.split(" ");
-  const at = Math.ceil(words.length / 2);
-  return [words.slice(0, at).join(" "), words.slice(at).join(" ")].join("\n");
-}
-
-/* The nine teams as a filmstrip. Deliberately not portraits: the founding team
-   has not been appointed, and a row of stock faces standing in for real students
-   would be a lie the rest of the page then has to live with. Each card carries
-   its team's remit instead, and the strip takes real photographs the moment the
-   Media team has them. */
-const STRIP: HeroCarouselItem[] = ROLES.map((role, i) => ({
-  id: role.title,
-  title: twoLines(role.title),
-  image: plate(i),
-  accent: ACCENTS[i % ACCENTS.length],
-}));
-
 export function TeamPage() {
   return (
     <Page>
@@ -147,18 +26,6 @@ export function TeamPage() {
         title="Centralized enough to hold direction"
         standfirst="Decentralized enough that teams decide for themselves. Leadership transfers are structured: every team maintains its own procedures, documents and contacts, so the club survives any change in student leadership."
       />
-
-      <Section title="The nine teams" intro="Drag the strip, or use the arrow keys.">
-        <div className="pt-2">
-          <HeroCarousel
-            items={STRIP}
-            defaultIndex={0}
-            autoplay
-            autoplayDelay={5200}
-            className="h-[75dvh] min-h-[26rem]"
-          />
-        </div>
-      </Section>
 
       <Section title="What each team does" intro="Nine roles. Each operates independently within its own remit and coordinates directly with the others.">
         <div className="border-t border-rule">

@@ -1,6 +1,10 @@
 "use client";
 
 import { Masthead, Page, Section, Index, Plates, Pull, Note } from "@/components/layout/editorial";
+import { HeroCarousel, type HeroCarouselItem } from "@/components/ui/hero-carousel";
+import { ROLES } from "@/lib/teams";
+import { plate } from "@/lib/imagery";
+import { Link } from "react-router-dom";
 
 const IDENTITY = [
   {
@@ -60,6 +64,32 @@ const PRINCIPLES = [
   { term: "Collaboration", detail: "Teams work together while retaining functional autonomy." },
   { term: "Representation", detail: "A platform for showcasing biotechnology and its interdisciplinary applications at AIT." },
 ];
+
+/* One hue per team, walked around a cool marine range so the backdrop swings on
+   every change without ever leaving the site's palette. */
+const ACCENTS = [
+  "#21476e", "#2f6d7a", "#3a5f9e", "#4a4f8c", "#2b7a6b",
+  "#5a4a86", "#1f5f8b", "#3d6b5a", "#46527f",
+];
+
+/** Break a team name into two roughly equal lines, since the carousel sets each
+    line as its own reveal and one long trailing line reads badly. */
+function twoLines(title: string) {
+  const words = title.split(" ");
+  const at = Math.ceil(words.length / 2);
+  return [words.slice(0, at).join(" "), words.slice(at).join(" ")].join("\n");
+}
+
+/* The nine teams as a filmstrip. Deliberately not portraits: this is the shape
+   of the organisation, not its roster. The people are on the Team page, on a
+   sphere, and putting faces here as well would say the same thing twice in two
+   different ways. */
+const STRIP: HeroCarouselItem[] = ROLES.map((role, i) => ({
+  id: role.title,
+  title: twoLines(role.title),
+  image: plate(i),
+  accent: ACCENTS[i % ACCENTS.length],
+}));
 
 function Chain({ steps, muted }: { steps: string[]; muted?: boolean }) {
   return (
@@ -148,6 +178,28 @@ export function AboutPage() {
             <Chain steps={JellyTech} />
           </div>
         </div>
+      </Section>
+
+      <Section
+        title="How the work is divided"
+        intro="Nine functional teams, each operating independently within its own remit and coordinating directly with the others. Drag the strip, or use the arrow keys."
+      >
+        <div className="pt-2">
+          <HeroCarousel
+            items={STRIP}
+            defaultIndex={0}
+            autoplay
+            autoplayDelay={5200}
+            className="h-[70dvh] min-h-[24rem]"
+          />
+        </div>
+        <p className="measure mt-8 text-ink-muted">
+          What each team actually does, and who is on it, is on the{" "}
+          <Link to="/team" className="text-glow-bright underline underline-offset-4">
+            Team &amp; governance
+          </Link>{" "}
+          page.
+        </p>
       </Section>
 
       <Section title="Constitutional principles" intro="Ten principles that govern how the club functions.">
