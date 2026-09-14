@@ -1,7 +1,8 @@
 "use client";
 
-import { Masthead, Page, Section, Index, Plates, Note } from "@/components/layout/editorial";
+import { Masthead, Page, Section, Index, Plates } from "@/components/layout/editorial";
 import { HeroCarousel, type HeroCarouselItem } from "@/components/ui/hero-carousel";
+import { TeamSphere } from "@/components/ui/team-sphere";
 import { plate } from "@/lib/imagery";
 
 const ROLES = [
@@ -203,12 +204,11 @@ export function TeamPage() {
         <Plates items={FINANCE} columns={2} />
       </Section>
 
-      <Section title="The people">
-        <Note>
-          The founding team is being constituted. Names, photographs and contact
-          details for each role will be published here once appointments are
-          confirmed by faculty.
-        </Note>
+      <Section
+        title="The people"
+        intro="Everyone currently on the club's roll, by team. Published from the admin panel, so it fills out as appointments are confirmed."
+      >
+        <TeamSphere />
       </Section>
     </Page>
   );

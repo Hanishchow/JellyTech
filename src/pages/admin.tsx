@@ -17,6 +17,8 @@ import {
   setEnquiryHandled,
   setMemberStatus,
   updateRow,
+  uploadTeamPhoto,
+  PHOTO_ACCEPT,
   type Enquiry,
   type Opportunity,
   type Post,
@@ -293,9 +295,94 @@ function Enquiries() {
 interface FieldSpec {
   name: string;
   label: string;
-  type?: "text" | "date" | "textarea" | "select" | "number";
+  type?: "text" | "date" | "textarea" | "select" | "number" | "photo";
   options?: readonly string[];
   full?: boolean;
+}
+
+/**
+ * A photo field: pick a file, it uploads, and the resulting URL goes into a
+ * hidden input so the surrounding form submits it like any other value.
+ *
+ * The URL stays editable underneath. Someone may already have the photo
+ * hosted, and refusing to accept a link they have would be worse than an
+ * upload button.
+ */
+function PhotoField({ name, label, initial }: { name: string; label: string; initial: string }) {
+  const [url, setUrl] = useState(initial);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onPick(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setBusy(true);
+    try {
+      setUrl(await uploadTeamPhoto(file));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setBusy(false);
+      // Clear it, so picking the same file twice still fires a change.
+      event.target.value = "";
+    }
+  }
+
+  return (
+    <div className="sm:col-span-2">
+      <span className={noirLabel}>{label}</span>
+
+      <div className="mt-1.5 flex items-start gap-4">
+        <div className="h-20 w-20 flex-none overflow-hidden rounded-full border border-white/20 bg-black">
+          {url ? (
+            <img src={url} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center text-[10px] text-white/30">
+              none
+            </span>
+          )}
+        </div>
+
+        <div className="flex-1 space-y-2">
+          <label className={cn(noirButton, "inline-block cursor-pointer")}>
+            {busy ? "Uploading…" : url ? "Replace photo" : "Upload photo"}
+            <input
+              type="file"
+              accept={PHOTO_ACCEPT}
+              onChange={onPick}
+              disabled={busy}
+              className="hidden"
+            />
+          </label>
+
+          <input
+            name={name}
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="or paste an image URL"
+            className={noirField}
+          />
+
+          {url && (
+            <button
+              type="button"
+              onClick={() => setUrl("")}
+              className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/40 hover:text-white"
+            >
+              Remove
+            </button>
+          )}
+
+          {error && <p className="text-[12px] text-white">{error}</p>}
+          <p className="text-[11px] leading-relaxed text-white/35">
+            Square photos work best: they are shown as circles. JPEG, PNG, WebP
+            or AVIF, under 5MB.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -358,6 +445,14 @@ function Editor<T extends { id: string; published: boolean }>({
         <form onSubmit={save} className="space-y-4 border border-white bg-white/[0.03] p-5">
           <div className="grid gap-4 sm:grid-cols-2">
             {fields.map((f) => (
+              f.type === "photo" ? (
+                <PhotoField
+                  key={f.name}
+                  name={f.name}
+                  label={f.label}
+                  initial={String((editing as Record<string, unknown>)[f.name] ?? "")}
+                />
+              ) : (
               <label key={f.name} className={cn("block", f.full && "sm:col-span-2")}>
                 <span className={noirLabel}>{f.label}</span>
                 {f.type === "textarea" ? (
@@ -386,6 +481,7 @@ function Editor<T extends { id: string; published: boolean }>({
                   />
                 )}
               </label>
+              )
             ))}
           </div>
 
@@ -510,7 +606,7 @@ function Team() {
         { name: "role", label: "Role" },
         { name: "team", label: "Team", type: "select", options: TEAMS },
         { name: "year", label: "Year" },
-        { name: "photo_url", label: "Photo URL", full: true },
+        { name: "photo_url", label: "Photograph", type: "photo" },
         { name: "sort_order", label: "Sort order", type: "number" },
       ]}
     />

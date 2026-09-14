@@ -169,6 +169,43 @@ export async function setEnquiryHandled(id: string, handled: boolean) {
   if (error) fail(error, "Could not update the enquiry.");
 }
 
+/* --- photographs ---------------------------------------------------------- */
+
+/** The bucket team photos live in. Public: these end up on a public page. */
+const PHOTO_BUCKET = "team-photos";
+
+/** What the browser will accept in the file picker, and what we re-check. */
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+
+export const PHOTO_ACCEPT = PHOTO_TYPES.join(",");
+
+/**
+ * Upload one photograph and return its public URL.
+ *
+ * The checks here are for the person uploading, not for security: they turn
+ * "the save failed" into "that file is 8MB, pick a smaller one" before a slow
+ * upload starts. A determined caller can bypass them, which is why the bucket
+ * is the thing that ultimately governs what may be written.
+ */
+export async function uploadTeamPhoto(file: File): Promise<string> {
+  if (!client) throw new Error("The backend is not configured in this build.");
+
+  if (!PHOTO_TYPES.includes(file.type)) {
+    throw new Error("That is not an image. Use a JPEG, PNG, WebP or AVIF.");
+  }
+  if (file.size > PHOTO_MAX_BYTES) {
+    const mb = (file.size / 1024 / 1024).toFixed(1);
+    throw new Error(`That photo is ${mb}MB. Keep it under 5MB.`);
+  }
+
+  // uploadAuto generates the key, so two people uploading "photo.jpg" on the
+  // same afternoon do not overwrite each other.
+  const { data, error } = await client.storage.from(PHOTO_BUCKET).uploadAuto(file);
+  if (error || !data?.url) fail(error, "Could not upload the photo.");
+  return data.url;
+}
+
 /* --- content -------------------------------------------------------------- */
 
 type Table = "opportunities" | "posts" | "team_members";
