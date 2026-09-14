@@ -83,7 +83,7 @@ export function Footer() {
             rel="noreferrer noopener"
             className="transition-colors hover:text-glow-bright"
           >
-            Made by Hanishchow
+            Designed and built by Hanishchow
           </a>
         </div>
       </div>

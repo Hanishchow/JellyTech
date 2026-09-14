@@ -117,7 +117,7 @@ export function TermsPage() {
               of its demo control panel.
             </p>
             <p>
-              This site was built by{" "}
+              This site was designed and built by{" "}
               <a
                 href="https://hanishchow.github.io/"
                 target="_blank"
