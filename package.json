@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc --noEmit && vite build",
+    "build:pages": "cross-env PAGES_BASE=/JellyTech/ pnpm run build",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
@@ -40,6 +42,7 @@
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.5.6",
+    "cross-env": "^10.1.0",
     "postcss": "^8.5.28",
     "tailwindcss": "^3.4.19",
     "typescript": "^7.0.2",
