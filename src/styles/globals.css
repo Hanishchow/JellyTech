@@ -28,8 +28,13 @@
    body, and Bricolage Grotesque at 800 carrying every heading. Its optical-size
    axis means a 160px headline is drawn as a different shape from a 20px
    subhead rather than one outline scaled up, which is what keeps weight this
-   heavy from going muddy. Martian Mono sets labels: very wide, very technical,
-   and at label sizes that width is the point.
+   heavy from going muddy.
+
+   Geist Mono sets labels and numerals. It replaced Martian Mono, which was
+   chosen for its width and then punished for it: at 11px with tracking on top,
+   a line like ACHARYA INSTITUTE OF TECHNOLOGY, BENGALURU sprawled across half
+   the footer and read as a banner rather than as small print. Geist is narrow,
+   quiet and still unmistakably a mono, which is all this role needed.
    ============================================================================= */
 
 @layer base {
@@ -56,7 +61,7 @@
 
     --font-display: "Bricolage Grotesque", "Archivo", ui-sans-serif, system-ui, sans-serif;
     --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    --font-mono: "Martian Mono", ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, monospace;
+    --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, monospace;
 
     --radius: 2px;
 
@@ -137,9 +142,11 @@
   .label {
     font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1;
-    letter-spacing: 0.12em;
+    /* Wider than body tracking, but less than before: Martian Mono was already
+       wide and the 0.12em on top of it was doubling down. */
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: rgb(var(--glow-bright));
   }

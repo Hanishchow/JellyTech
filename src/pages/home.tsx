@@ -65,18 +65,21 @@ export function HomePage() {
             scientific knowledge, but create, interpret and communicate it.
           </p>
 
-          <ol className="mt-14 flex flex-wrap items-center gap-x-3 gap-y-3 border-t border-rule pt-8">
+          <ol className="mt-14 flex flex-wrap gap-x-8 gap-y-8 border-t border-rule pt-8">
             {ECOSYSTEM.map((stage, i) => (
-              <li key={stage} className="flex items-center gap-3">
-                <span className="font-mono text-xs text-ink-faint">
+              /* The numeral sits above the word rather than beside it. Inline,
+                 the two ran together ("01Discover") and needed a separator dot
+                 to prise them apart, which put six dots across one line for no
+                 reason. Stacked, the alignment does that work and the dots go.
+                 The numeral is also set small and in the accent so it reads as
+                 a marker rather than as part of the label. */
+              <li key={stage} className="min-w-[7.5rem] flex-1">
+                <span className="block font-mono text-[11px] tabular-nums tracking-[0.08em] text-glow">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="font-display text-lg">{stage}</span>
-                {i < ECOSYSTEM.length - 1 && (
-                  <span className="text-ink-faint" aria-hidden="true">
-                    ·
-                  </span>
-                )}
+                <span className="mt-1.5 block font-display text-xl leading-none">
+                  {stage}
+                </span>
               </li>
             ))}
           </ol>
