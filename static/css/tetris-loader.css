@@ -53,7 +53,7 @@
 }
 
 .tl--screen__pct {
-  font: 600 clamp(64px, 12vw, 128px)/1 "Martian Mono", ui-monospace, SFMono-Regular, monospace;
+  font: 600 clamp(64px, 12vw, 128px)/1 "Geist Mono", ui-monospace, SFMono-Regular, monospace;
   letter-spacing: -0.02em;
   color: #c77dff;
   text-shadow: 0 0 28px rgba(157, 78, 221, 0.6), 0 0 70px rgba(157, 78, 221, 0.35);
