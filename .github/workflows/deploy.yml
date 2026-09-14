@@ -1,0 +1,83 @@
+# Build and publish the site on every push to main.
+#
+# Before this existed, deploying meant remembering a sequence by hand: build
+# with the right base path, copy index.html to 404.html, touch .nojekyll, then
+# commit the output to a branch. That is fine while one person deploys and a
+# liability the moment two do, because only whoever remembers the steps can
+# ship. Now nobody has to.
+#
+# It publishes through the official Pages actions rather than pushing built
+# files to a gh-pages branch, which means no third-party actions in the chain
+# and no build output committed to the repository.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # A button in the Actions tab, for re-running a deploy without a code change.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race. A queued one waits; it does not cancel the
+# running one, because cancelling mid-publish can leave the site half-updated.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Fails the deploy on a type error rather than shipping it. `build`
+      # already runs tsc, but doing it as its own step makes the log say which
+      # thing broke.
+      - run: pnpm typecheck
+
+      - run: pnpm build:pages
+        env:
+          # Publishable client credentials. These are compiled into the bundle
+          # and are meant to be public; member data is protected by row-level
+          # security in Postgres, not by hiding them. See insforge/migrations/.
+          # The admin key is a different thing entirely and must never be here.
+          VITE_INSFORGE_URL: https://6v9g2tra.ap-southeast.insforge.app
+          VITE_INSFORGE_ANON_KEY: anon_8f330d01aa1cd49e161c2d1fda70ce9e78ab51e20c76fa254b366de30df8df44
+
+      # GitHub Pages has no rewrite rule, so a direct visit to /JellyTech/team
+      # would 404. Serving the app from 404.html as well is what makes deep
+      # links work.
+      - run: cp dist/index.html dist/404.html
+
+      # Stops Pages running the output through Jekyll, which would drop any
+      # file or directory beginning with an underscore.
+      - run: touch dist/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
