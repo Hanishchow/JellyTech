@@ -84,8 +84,14 @@ export function TeamSphere() {
               autoRotateSpeed={0.18}
               renderDetail={(image) => (
                 <>
-                  <h3 className="font-display text-2xl">{image.title}</h3>
-                  <p className="label mt-2">{image.description}</p>
+                  {/* Maximalist: the name is the loudest thing on the card, set
+                      at display weight and tightened until the letters touch. */}
+                  <h3 className="font-display text-[clamp(2rem,4.5vw,3.5rem)] font-black uppercase leading-[0.86] tracking-[-0.04em] text-ink">
+                    {image.title}
+                  </h3>
+                  <p className="mt-3 font-mono text-[0.7rem] uppercase leading-[1.5] tracking-[0.22em] text-glow-bright">
+                    {image.description}
+                  </p>
                 </>
               )}
             />
@@ -97,11 +103,11 @@ export function TeamSphere() {
       {withoutPhotos.length > 0 && (
         <div className="border-t border-rule pt-8">
           {images.length > 0 && <p className="label mb-5">Also on the team</p>}
-          <ul className="grid gap-x-10 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-x-10 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
             {withoutPhotos.map((m) => (
               <li key={m.id}>
-                <p className="font-display text-xl">{m.name}</p>
-                <p className="mt-1 text-sm text-ink-muted">
+                <p className="font-display text-[clamp(1.5rem,2.6vw,2.25rem)] font-black uppercase leading-[0.9] tracking-[-0.035em]">{m.name}</p>
+                <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-muted">
                   {m.role} · {m.team}
                   {m.year ? ` · ${m.year}` : ""}
                 </p>

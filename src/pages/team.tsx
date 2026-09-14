@@ -27,6 +27,13 @@ export function TeamPage() {
         standfirst="Decentralized enough that teams decide for themselves. Leadership transfers are structured: every team maintains its own procedures, documents and contacts, so the club survives any change in student leadership."
       />
 
+      <Section
+        title="The people"
+        intro="Everyone currently on the club's roll, by team. Published from the admin panel, so it fills out as appointments are confirmed."
+      >
+        <TeamSphere />
+      </Section>
+
       <Section title="What each team does" intro="Nine roles. Each operates independently within its own remit and coordinates directly with the others.">
         <div className="border-t border-rule">
           {ROLES.map((role, i) => (
@@ -71,12 +78,6 @@ export function TeamPage() {
         <Plates items={FINANCE} columns={2} />
       </Section>
 
-      <Section
-        title="The people"
-        intro="Everyone currently on the club's roll, by team. Published from the admin panel, so it fills out as appointments are confirmed."
-      >
-        <TeamSphere />
-      </Section>
     </Page>
   );
 }
