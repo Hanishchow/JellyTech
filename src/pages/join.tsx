@@ -100,7 +100,7 @@ export function JoinPage() {
         eyebrow="Join"
         title="Open to every department"
         standfirst="JellyTech is a co-curricular club, not a course. Tell us who you are and which side of the work interests you, and the Cultural & Engagement team will be in touch when the founding intake opens."
-        videoBg="/brand-film.mp4"
+        videoBg={`${import.meta.env.BASE_URL}brand-film.mp4`}
       />
 
       <Section title="Who it is for">
