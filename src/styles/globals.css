@@ -207,6 +207,73 @@
    opens in.
    ============================================================================= */
 
+/* =============================================================================
+   MUSIC PLAYER — floating toggle, bottom-right of every page.
+   ============================================================================= */
+
+@keyframes bar-bounce {
+  from { transform: scaleY(0.35); }
+  to   { transform: scaleY(1); }
+}
+
+.music-player-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgb(var(--ground-raised));
+  border: 1px solid rgb(var(--rule));
+  color: rgb(var(--ink-faint));
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.25s, color 0.25s, box-shadow 0.25s;
+}
+
+.music-player-btn[data-playing] {
+  color: rgb(var(--glow-bright));
+  border-color: rgb(var(--glow) / 0.4);
+  box-shadow:
+    0 0 0 1px rgb(var(--glow) / 0.12),
+    0 0 20px -4px rgb(var(--glow) / 0.35);
+}
+
+.music-player-btn:hover {
+  color: rgb(var(--ink-muted));
+  border-color: rgb(var(--glow) / 0.3);
+}
+
+.music-player-btn[data-playing]:hover {
+  color: rgb(var(--glow-bright));
+}
+
+.music-bars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 12px;
+}
+
+.music-bar {
+  display: block;
+  width: 2px;
+  height: 100%;
+  background: currentColor;
+  border-radius: 1px;
+  transform-origin: bottom;
+  transform: scaleY(0.35);
+}
+
+.music-bar[data-playing] {
+  animation: bar-bounce 0.7s ease-in-out infinite alternate;
+}
+
 .page-ground {
   position: fixed;
   inset: 0;

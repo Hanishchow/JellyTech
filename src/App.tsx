@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { TetrisLoader } from '@/components/ui/tetris-loader'
+import { MusicPlayer } from '@/components/ui/music-player'
 import { HomePage } from '@/pages/home'
 import { AboutPage } from '@/pages/about'
 import { ProgramsPage } from '@/pages/programs'
@@ -96,6 +97,7 @@ export default function App() {
     <div className="min-h-[100dvh] bg-ground text-ink">
       <TetrisLoader />
       <ScrollToTop />
+      <MusicPlayer />
       <Navbar />
       <main>
         <Routes>
