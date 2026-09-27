@@ -96,7 +96,7 @@ export function ProgramsPage() {
         <Plates items={THEMES} />
 
         <div className="mt-20">
-          <p className="label mb-6">Tracked now</p>
+          <p className="label label--eyebrow mb-6">Tracked now</p>
           <OpportunityList />
         </div>
       </Section>
@@ -126,7 +126,7 @@ export function ProgramsPage() {
       <Section title="Speakers" intro="Talks sourced from long-term relationships rather than last-minute requests.">
         <Plates items={SPEAKERS} columns={2} />
         <div className="mt-16">
-          <p className="label mb-6">Engagement formats</p>
+          <p className="label label--eyebrow mb-6">Engagement formats</p>
           <Plates items={FORMATS} columns={2} />
         </div>
       </Section>

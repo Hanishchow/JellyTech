@@ -170,11 +170,11 @@ export function AboutPage() {
       >
         <div className="grid gap-12 border-t border-rule pt-10 md:grid-cols-2">
           <div>
-            <p className="label mb-5">Conventional</p>
+            <p className="label label--eyebrow mb-5">Conventional</p>
             <Chain steps={CONVENTIONAL} muted />
           </div>
           <div>
-            <p className="label mb-5 text-glow-bright">JellyTech</p>
+            <p className="label label--eyebrow mb-5 text-glow-bright">JellyTech</p>
             <Chain steps={JellyTech} />
           </div>
         </div>

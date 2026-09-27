@@ -24,14 +24,37 @@ export function Masthead({
   title,
   standfirst,
   children,
+  videoBg,
 }: {
   eyebrow?: string;
   title: string;
   standfirst?: string;
   children?: ReactNode;
+  videoBg?: string;
 }) {
   return (
-    <header className="relative border-b border-rule pb-16 pt-40">
+    <header className="relative border-b border-rule pb-16 pt-40" style={videoBg ? { overflow: "hidden" } : undefined}>
+      {/* Brand film background — plays muted and looped; a gradient kills the
+          edges so the video fades into the ground rather than hard-cutting. */}
+      {videoBg && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <video
+            src={videoBg}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover opacity-30"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgb(var(--ground)) 0%, transparent 25%, transparent 75%, rgb(var(--ground)) 100%), linear-gradient(to right, rgb(var(--ground)) 0%, transparent 40%)",
+            }}
+          />
+        </div>
+      )}
       {/* A bloom behind the masthead, as though the page itself were lit from
           under the headline. Fixed size in vw so it scales with the type. */}
       <div
@@ -43,7 +66,7 @@ export function Masthead({
         }}
       />
       <div className="relative mx-auto max-w-page px-6">
-        {eyebrow && <p className="label mb-8">{eyebrow}</p>}
+        {eyebrow && <p className="label label--eyebrow mb-8">{eyebrow}</p>}
         <h1 className="max-w-[15ch] text-display">{title}</h1>
         {standfirst && (
           <p className="measure mt-10 text-lead text-ink-muted">{standfirst}</p>

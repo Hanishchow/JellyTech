@@ -138,17 +138,38 @@
 
   /* Metadata: the mono label above a section or beside a field. Always the
      bright violet, never the brand one: at 11px the brand violet measures
-     4.35:1 on the ground and fails AA. */
+     4.35:1 on the ground and fails AA. Glows softly — the same text-shadow
+     trick as .lit but dialled back to label scale so it reads as lit, not
+     as shouting. */
   .label {
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 500;
     line-height: 1;
-    /* Wider than body tracking, but less than before: Martian Mono was already
-       wide and the 0.12em on top of it was doubling down. */
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: rgb(var(--glow-bright));
+    text-shadow:
+      0 0 12px rgb(var(--glow) / 0.5),
+      0 0 28px rgb(var(--glow) / 0.22);
+  }
+
+  /* Section eyebrow: the label that opens a major section or page.
+     The leading rule gives it weight without adding words — it reads as
+     a heading marker rather than inline metadata. */
+  .label--eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65em;
+  }
+  .label--eyebrow::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+    flex-shrink: 0;
   }
 
   .label--signal {

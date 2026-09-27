@@ -57,7 +57,7 @@ export function HomePage() {
       {/* The reader arrives out of the water into the paper. */}
       <div className="relative z-10 bg-ground">
         <Section className="pt-28">
-          <p className="label">Acharya Institute of Technology</p>
+          <p className="label label--eyebrow">Acharya Institute of Technology</p>
           <p className="measure mt-8 font-display text-[clamp(1.5rem,3vw,2.4rem)] leading-[1.25]">
             JellyTech is a student-led, faculty-supervised club building a
             continuous ecosystem of scientific exposure, research engagement and
