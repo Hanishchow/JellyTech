@@ -100,8 +100,27 @@ export function JoinPage() {
         eyebrow="Join"
         title="Open to every department"
         standfirst="JellyTech is a co-curricular club, not a course. Tell us who you are and which side of the work interests you, and the Cultural & Engagement team will be in touch when the founding intake opens."
-        videoBg={`${import.meta.env.BASE_URL}brand-film.mp4`}
       />
+
+      {/* Brand film — full-bleed, its own breathing room */}
+      <div className="relative overflow-hidden" style={{ height: "clamp(280px, 55vh, 680px)" }}>
+        <video
+          src={`${import.meta.env.BASE_URL}brand-film.mp4`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* fade to ground at top and bottom */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgb(7 5 12) 0%, transparent 18%, transparent 82%, rgb(7 5 12) 100%)",
+          }}
+        />
+      </div>
 
       <Section title="Who it is for">
         <Plates items={WHY} />
