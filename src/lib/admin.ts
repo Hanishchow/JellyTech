@@ -180,6 +180,47 @@ const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 
 export const PHOTO_ACCEPT = PHOTO_TYPES.join(",");
 
+/** Faces are shown as circles under ~400px, so anything bigger is wasted bytes. */
+const PHOTO_EDGE = 720;
+
+/**
+ * Centre-crop to a square, scale down and re-encode as WebP before upload. A
+ * phone photo of several MB becomes a few tens of KB, which is what keeps the
+ * team sphere quick. If the browser cannot do it, the original goes up as is.
+ */
+async function shrinkPhoto(file: File): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const side = Math.min(bitmap.width, bitmap.height);
+    const edge = Math.min(PHOTO_EDGE, side);
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = edge;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(
+      bitmap,
+      (bitmap.width - side) / 2,
+      (bitmap.height - side) / 2,
+      side,
+      side,
+      0,
+      0,
+      edge,
+      edge
+    );
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/webp", 0.82)
+    );
+    if (!blob || blob.size >= file.size) return file;
+    const name = file.name.replace(/\.[^.]+$/, "") || "photo";
+    return new File([blob], `${name}.webp`, { type: "image/webp" });
+  } catch {
+    return file;
+  }
+}
+
 /**
  * Upload one photograph and return its public URL.
  *
@@ -201,7 +242,9 @@ export async function uploadTeamPhoto(file: File): Promise<string> {
 
   // uploadAuto generates the key, so two people uploading "photo.jpg" on the
   // same afternoon do not overwrite each other.
-  const { data, error } = await client.storage.from(PHOTO_BUCKET).uploadAuto(file);
+  const { data, error } = await client.storage
+    .from(PHOTO_BUCKET)
+    .uploadAuto(await shrinkPhoto(file));
   if (error || !data?.url) fail(error, "Could not upload the photo.");
   return data.url;
 }

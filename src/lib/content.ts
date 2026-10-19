@@ -71,12 +71,40 @@ export const listPosts = () =>
     rows.sort((a, b) => (b.published_on ?? "").localeCompare(a.published_on ?? ""))
   );
 
-export const listTeam = () =>
-  read<PublishedTeamMember>("team_members").then((rows) =>
-    rows.sort(
+let teamRequest: Promise<PublishedTeamMember[]> | null = null;
+
+/** One shared request, so prefetching on hover and rendering the page cost a single round trip. */
+export const listTeam = () => {
+  teamRequest ??= read<PublishedTeamMember>("team_members").then((rows) => {
+    // A failed read comes back empty; do not remember it.
+    if (rows.length === 0) teamRequest = null;
+    return rows.sort(
       (a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name)
-    )
-  );
+    );
+  });
+  return teamRequest;
+};
+
+// Held so the browser keeps the downloads going and the decoded images warm.
+const warmed = new Map<string, HTMLImageElement>();
+
+export function preloadImages(urls: Array<string | null>) {
+  for (const url of urls) {
+    if (!url || warmed.has(url)) continue;
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+    warmed.set(url, img);
+  }
+}
+
+/** Start the team list and every face loading, before the page that shows them is open. */
+export function prefetchTeam() {
+  return listTeam().then((rows) => {
+    preloadImages(rows.map((m) => m.photo_url));
+    return rows;
+  });
+}
 
 /** "14 November 2026", or null when there is no date to show. */
 export function formatDate(value: string | null) {

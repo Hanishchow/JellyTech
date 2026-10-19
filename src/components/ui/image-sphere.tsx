@@ -468,7 +468,7 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
             alt=""
             className="h-full w-full object-cover"
             draggable={false}
-            loading={index < 6 ? "eager" : "lazy"}
+            decoding="async"
           />
         </span>
       </button>

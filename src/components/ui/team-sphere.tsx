@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import SphereImageGrid, { type ImageData } from "@/components/ui/image-sphere";
-import { listTeam, type PublishedTeamMember } from "@/lib/content";
+import { prefetchTeam, type PublishedTeamMember } from "@/lib/content";
 import { Note } from "@/components/layout/editorial";
 
 /**
@@ -20,7 +20,9 @@ export function TeamSphere() {
 
   useEffect(() => {
     let cancelled = false;
-    listTeam().then((rows) => !cancelled && setMembers(rows));
+    // Every photo starts downloading together as soon as the list arrives,
+    // rather than each one waiting until the sphere turns it into view.
+    prefetchTeam().then((rows) => !cancelled && setMembers(rows));
     return () => {
       cancelled = true;
     };

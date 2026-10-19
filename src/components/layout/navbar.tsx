@@ -5,6 +5,9 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { useMotionValueEvent, useScroll } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { asset } from "@/lib/asset";
+import { prefetchTeam } from "@/lib/content";
+
+const warmTeam = () => void prefetchTeam();
 
 const NAV = [
   { title: "About", url: "/about" },
@@ -66,6 +69,8 @@ export function Navbar() {
             <NavLink
               key={item.url}
               to={item.url}
+              onPointerEnter={item.url === "/team" ? warmTeam : undefined}
+              onFocus={item.url === "/team" ? warmTeam : undefined}
               className={({ isActive }) =>
                 cn(
                   "relative py-1 text-base font-medium transition-colors",
@@ -110,7 +115,11 @@ export function Navbar() {
           <ul className="space-y-5">
             {NAV.map((item) => (
               <li key={item.url}>
-                <Link to={item.url} className="font-display text-4xl font-extrabold">
+                <Link
+                  to={item.url}
+                  onPointerDown={item.url === "/team" ? warmTeam : undefined}
+                  className="font-display text-4xl font-extrabold"
+                >
                   {item.title}
                 </Link>
               </li>
