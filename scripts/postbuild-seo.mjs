@@ -69,7 +69,8 @@ const today = new Date().toISOString().slice(0, 10);
 const urls = [];
 
 for (const [route, meta] of Object.entries(config.routes)) {
-  const url = route === "/" ? `${site}/` : `${site}${route}`;
+  // Pages 301s /about to /about/, so the slash form is the canonical one.
+  const url = route === "/" ? `${site}/` : `${site}${route}/`;
   const html = render(template, { ...meta, url, robots: "index, follow, max-image-preview:large" });
   if (route === "/") {
     writeFileSync(join(dist, "index.html"), html);

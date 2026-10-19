@@ -35,7 +35,7 @@ export function applySeo(pathname: string) {
   const path = normalise(pathname);
   const entry = routes[path];
   const { title, description } = entry ?? FALLBACK;
-  const url = config.site + (path === "/" ? "/" : path);
+  const url = config.site + (path === "/" ? "/" : `${path}/`);
 
   document.title = title;
   meta("name", "description", description);
