@@ -1,0 +1,39 @@
+{
+  "site": "https://hanishchow.github.io/JellyTech",
+  "name": "JellyTech",
+  "image": "https://hanishchow.github.io/JellyTech/static/img/emblem-512.png",
+  "routes": {
+    "/": {
+      "title": "JellyTech | Biotechnology & Life Sciences Club, Acharya Institute",
+      "description": "JellyTech is a student-led, faculty-supervised biotechnology and life-sciences club at Acharya Institute of Technology, Bengaluru: workshops, research engagement and science communication."
+    },
+    "/about": {
+      "title": "About JellyTech | Student-led Biotechnology Club",
+      "description": "A student-led, faculty-supervised, non-commercial co-curricular organization at Acharya Institute of Technology, building exposure, participation, creation and communication in biotechnology."
+    },
+    "/programs": {
+      "title": "Programs | JellyTech Workshops, Hackathons & Conferences",
+      "description": "Scientific conferences, symposiums, workshops, courses and hackathons coordinated by JellyTech, each one documented so it becomes the foundation for the next."
+    },
+    "/media": {
+      "title": "Media | JellyTech Explainers, Podcast & Magazine",
+      "description": "JellyTech's publishing arm: explainers, news, interviews, a podcast and a magazine, reviewed for scientific accuracy before anything goes out."
+    },
+    "/team": {
+      "title": "Team | How JellyTech Is Run",
+      "description": "Decentralized teams that decide for themselves, with documented handovers so the JellyTech club survives any change in student leadership."
+    },
+    "/join": {
+      "title": "Join JellyTech | Apply to the Biotechnology Club",
+      "description": "JellyTech is a co-curricular club, not a course. Tell us who you are and which side of the work interests you, and we will be in touch when the founding intake opens."
+    },
+    "/privacy": {
+      "title": "Privacy | JellyTech",
+      "description": "JellyTech is a non-commercial student club. The site collects the minimum it needs to process a membership application and nothing else."
+    },
+    "/terms": {
+      "title": "Terms of Use | JellyTech",
+      "description": "This site is published by a student club of Acharya Institute of Technology for informational purposes."
+    }
+  }
+}

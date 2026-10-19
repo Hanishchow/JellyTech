@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/footer'
 import { TetrisLoader } from '@/components/ui/tetris-loader'
 import { MusicPlayer } from '@/components/ui/music-player'
 import { HomePage } from '@/pages/home'
+import { StampsPage } from '@/pages/stamps'
 import { AboutPage } from '@/pages/about'
 import { ProgramsPage } from '@/pages/programs'
 import { MediaPage } from '@/pages/media'
@@ -13,6 +14,7 @@ import { JoinPage } from '@/pages/join'
 import { LoginPage } from '@/pages/login'
 import { DashboardPage } from '@/pages/dashboard'
 import { PrivacyPage, TermsPage, NotFoundPage } from '@/pages/legal'
+import { applySeo } from '@/lib/seo'
 
 /* The panel and the lab benches are split out of the main bundle. Three.js
    alone is ~500KB, and it is imported by a route the public never opens;
@@ -75,15 +77,20 @@ function ScrollToTop() {
 export default function App() {
   const { pathname } = useLocation()
 
+  useEffect(() => {
+    applySeo(pathname)
+  }, [pathname])
+
   /* The admin panel deliberately sits outside the site's chrome: no navbar, no
      footer, no loading screen, no jellyfish. It is a different room. */
-  if (pathname.startsWith('/admin') || pathname.startsWith('/lab')) {
+  if (pathname.startsWith('/admin') || pathname.startsWith('/lab') || pathname === '/stamps') {
     return (
       <>
         <DismissLoader />
         <Suspense fallback={<div className="min-h-[100dvh] bg-ground" />}>
           <Routes>
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/stamps" element={<StampsPage />} />
             <Route path="/lab/medusa" element={<LabMedusaPage />} />
             <Route path="/lab/original" element={<LabOriginalPage />} />
             <Route path="/lab/framing" element={<LabFramingPage />} />

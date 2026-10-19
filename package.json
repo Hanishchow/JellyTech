@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "build:pages": "cross-env PAGES_BASE=/JellyTech/ pnpm run build",
+    "build:pages": "cross-env PAGES_BASE=/JellyTech/ pnpm run build && node scripts/postbuild-seo.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0",
     "@hookform/resolvers": "^5.9.1",
     "@insforge/sdk": "^1.5.2",
     "@paper-design/shaders": "^0.0.80",

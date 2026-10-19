@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createJellyField } from "@/components/ui/jelly-field";
+import { StampsPile } from "@/components/ui/stamps-pile";
 import { asset } from "@/lib/asset";
 
 /**
@@ -123,6 +124,17 @@ export function JellyHero() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-40 bg-gradient-to-b from-transparent to-ground"
       />
+
+      {/* Section navigation: a fanned hand of stamps in the lower-left corner.
+          The jellyfish layer is pointer-events-none, so this sits above it
+          without ever touching the animal or the wheel. Bottom-right belongs
+          to the music button. */}
+      <nav
+        aria-label="Sections"
+        className="absolute bottom-6 left-4 z-[2] h-[200px] w-[290px] origin-bottom-left scale-[0.78] sm:left-6 sm:scale-100"
+      >
+        <StampsPile compact />
+      </nav>
     </section>
   );
 }

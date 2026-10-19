@@ -61,10 +61,10 @@ jobs:
           VITE_INSFORGE_URL: https://6v9g2tra.ap-southeast.insforge.app
           VITE_INSFORGE_ANON_KEY: anon_8f330d01aa1cd49e161c2d1fda70ce9e78ab51e20c76fa254b366de30df8df44
 
-      # GitHub Pages has no rewrite rule, so a direct visit to /JellyTech/team
-      # would 404. Serving the app from 404.html as well is what makes deep
-      # links work.
-      - run: cp dist/index.html dist/404.html
+      # build:pages ends with scripts/postbuild-seo.mjs, which writes a real
+      # dist/<route>/index.html per public page (Pages answers those with 200,
+      # where a 404.html fallback is sent as a 404 and does not index), plus
+      # 404.html, sitemap.xml, robots.txt and the CSP meta tag.
 
       # Stops Pages running the output through Jekyll, which would drop any
       # file or directory beginning with an underscore.
@@ -80,6 +80,20 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Fails the run if the live site is not indexable: every sitemap URL must
+  # answer 200 with its own title and a canonical, and none may be noindex.
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the live site
+        env:
+          SITE_URL: ${{ needs.deploy.outputs.page_url }}
+        run: node scripts/check-live-seo.mjs

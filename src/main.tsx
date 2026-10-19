@@ -2,6 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
+import '@fontsource-variable/bricolage-grotesque/opsz.css'
+import '@fontsource-variable/instrument-sans'
+import '@fontsource-variable/geist-mono'
 import './styles/globals.css'
 
 /* A note for anyone who opens the console. Not in the page, because it is not

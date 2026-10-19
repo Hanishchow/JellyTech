@@ -1,0 +1,22 @@
+# Weekly check that the live site is still indexable: every sitemap URL answers
+# 200 with its own title and canonical, and nothing public has gone noindex.
+# Also runnable by hand from the Actions tab. No third-party actions.
+name: SEO check
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-live-seo.mjs

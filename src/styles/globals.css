@@ -59,9 +59,9 @@
     /* Rationed. Marks things that have not happened yet, and nothing else. */
     --signal: 255 138 76;
 
-    --font-display: "Bricolage Grotesque", "Archivo", ui-sans-serif, system-ui, sans-serif;
-    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, monospace;
+    --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Instrument Sans Variable", "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, monospace;
 
     --radius: 2px;
 
