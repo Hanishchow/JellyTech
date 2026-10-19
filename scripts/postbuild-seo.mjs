@@ -7,6 +7,7 @@
 // injected here and not in index.html so the dev server's inline HMR script is
 // not blocked.
 
+import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -65,7 +66,14 @@ function render(html, { title, description, url, robots }) {
   return out.replace(/(<meta charset="[^"]*"\s*\/>)/i, `$1\n    ${csp}`);
 }
 
-const today = new Date().toISOString().slice(0, 10);
+// lastmod should change when the content does, not on every build, so use the
+// date of the commit being built and fall back to today outside a git checkout.
+let today = new Date().toISOString().slice(0, 10);
+try {
+  today = execSync("git log -1 --format=%cs", { cwd: root, stdio: ["ignore", "pipe", "ignore"] })
+    .toString()
+    .trim() || today;
+} catch {}
 const urls = [];
 
 for (const [route, meta] of Object.entries(config.routes)) {
