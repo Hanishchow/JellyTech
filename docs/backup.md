@@ -41,15 +41,19 @@ include sign-in accounts, which InsForge keeps separately, and it does not
 include uploaded team photos in storage. A restored `members` row whose sign-in
 no longer exists needs that person to join again.
 
-Before any migration that changes the live database, take a manual dump first:
+Before any migration that changes the live database, take a manual dump first.
+The script reads the admin key from the environment, so it never appears on the
+command line or in shell history:
 
 ```bash
-insforge db export --output ../jt-backups/before-change.json
+INSFORGE_API_KEY=$(node -p "require('./.insforge/project.json').api_key") node scripts/export-db.mjs ../jt-backups/before-change.sql
 ```
 
-Keep that file outside the repository. The CLI writes a JSON envelope; the SQL
-is its `data` field, so unwrap it before importing:
+Keep that file outside the repository.
 
-```bash
-node -e "const f=require('fs');f.writeFileSync('restore.sql',JSON.parse(f.readFileSync('../jt-backups/before-change.json','utf8')).data)"
-```
+## Why not `insforge db export`
+
+The CLI refuses to run without an interactive browser login, which a CI runner
+cannot do. `scripts/export-db.mjs` makes the same single authenticated request
+the CLI makes. The API caps an export at 10,000 rows per table; the club has a
+few dozen, but a table nearing that would need the script to page.

@@ -26,61 +26,30 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Install the InsForge CLI
-        run: npm install -g @insforge/cli@0.2.0
-
-      - name: Link the project
-        env:
-          INSFORGE_API_KEY: ${{ secrets.INSFORGE_API_KEY }}
-        run: |
-          if [ -z "$INSFORGE_API_KEY" ]; then
-            echo "::error::INSFORGE_API_KEY is not set. See the header of this file."
-            exit 1
-          fi
-          mkdir -p .insforge
-          # The ids below are identifiers, not credentials. Only the key is secret.
-          node -e '
-            require("fs").writeFileSync(".insforge/project.json", JSON.stringify({
-              project_id: "56b2afe0-1dbb-4855-b6f1-6ff18fffb299",
-              project_name: "jellytech",
-              org_id: "6bf3ce54-87ca-4c41-9af1-150118b1ffb8",
-              appkey: "6v9g2tra",
-              region: "ap-southeast",
-              api_key: process.env.INSFORGE_API_KEY,
-              oss_host: "https://6v9g2tra.ap-southeast.insforge.app"
-            }));
-          '
-
       - name: Export and encrypt
         env:
+          INSFORGE_API_KEY: ${{ secrets.INSFORGE_API_KEY }}
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
           set -euo pipefail
-          if [ -z "$BACKUP_PASSPHRASE" ]; then
-            echo "::error::BACKUP_PASSPHRASE is not set. See the header of this file."
+          if [ -z "$INSFORGE_API_KEY" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::INSFORGE_API_KEY and BACKUP_PASSPHRASE must both be set. See the header of this file."
             exit 1
           fi
           umask 077
-          # The CLI writes a JSON envelope ({"format","data","timestamp"}), not bare
-          # SQL; the SQL is the `data` string. Unwrap it so a restore is plain SQL.
-          insforge db export --row-limit 100000 --output export.json
-          node -e '
-            const fs = require("fs");
-            const { data } = JSON.parse(fs.readFileSync("export.json", "utf8"));
-            if (typeof data !== "string") throw new Error("export has no data field");
-            fs.writeFileSync("backup.sql", data);
-          '
-          rm -f export.json
-          # A tiny file or no INSERTs means the export failed quietly; do not upload it.
-          test "$(wc -c < backup.sql)" -gt 1000
-          grep -q "^INSERT INTO" backup.sql
+          # scripts/export-db.mjs refuses to write a tiny or row-less export, so a
+          # quietly failed export fails this step instead of being uploaded.
+          node scripts/export-db.mjs backup.sql
           printf '%s' "$BACKUP_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback \
             --passphrase-fd 0 --symmetric --cipher-algo AES256 -o "jellytech-$(date -u +%F).sql.gpg" backup.sql
-          rm -f backup.sql .insforge/project.json
+          rm -f backup.sql
+          ls -l jellytech-*.sql.gpg
 
       - uses: actions/upload-artifact@v4
         with:
