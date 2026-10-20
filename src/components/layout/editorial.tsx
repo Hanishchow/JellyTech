@@ -195,3 +195,46 @@ export function Note({ children }: { children: ReactNode }) {
     </p>
   );
 }
+
+/**
+ * What a list shows while it is fetching, and when the fetch failed. The failed
+ * case matters: a read that errors used to come back as an empty list, which the
+ * page then described as "nothing published yet", a claim that was simply false.
+ */
+export function LoadState({
+  failed,
+  what,
+  onRetry,
+}: {
+  failed: boolean;
+  what: string;
+  onRetry?: () => void;
+}) {
+  if (!failed) {
+    return (
+      <p role="status" className="label animate-pulse border-t border-rule pt-8">
+        Loading {what}…
+      </p>
+    );
+  }
+  return (
+    <p
+      role="alert"
+      className="measure border-l-4 border-destructive bg-destructive/[0.08] px-7 py-6 leading-relaxed text-ink-muted"
+    >
+      Could not load {what}. Check your connection and try again.
+      {onRetry && (
+        <>
+          {" "}
+          <button
+            type="button"
+            onClick={onRetry}
+            className="text-glow-bright underline underline-offset-4"
+          >
+            Try again
+          </button>
+        </>
+      )}
+    </p>
+  );
+}

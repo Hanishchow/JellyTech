@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "react-router-dom";
 import { Masthead, Page, Section } from "@/components/layout/editorial";
 
 function Clause({ title, children }: { title: string; children: React.ReactNode }) {
@@ -42,17 +43,46 @@ export function PrivacyPage() {
               sold, shared with third parties, or used for advertising.
             </p>
           </Clause>
-          <Clause title="Analytics and tracking">
+          <Clause title="Analytics and error reports">
             <p>
-              This site sets no advertising or analytics cookies. Web fonts are
-              loaded from Google Fonts, which receives the request as part of
-              serving them.
+              The site counts page views itself, in the club's own database. For
+              each view it stores the page path, the time, and, on your first page
+              of a visit, the website you arrived from. It does not store your IP
+              address, set any cookie, use any third-party tracking script, or
+              record who you are, including when you are signed in. Browsers that
+              send a Do Not Track signal are not counted at all.
+            </p>
+            <p>
+              If something breaks in your browser, the site may send the error
+              message, the page it happened on and the name of the script file.
+              Nothing about you comes with it.
+            </p>
+            <p>
+              Fonts, scripts and images are served from the site itself, so no
+              third party sees your visit.
             </p>
           </Clause>
-          <Clause title="Removal">
+          <Clause title="Sign-in and security">
             <p>
-              Ask the club to delete your application or membership record at any
-              time, through the contact route on the Join page.
+              Passwords are handled by the club's backend provider and are never
+              visible to the club's team. If you sign in with Google, we receive
+              your name and email address from Google. Password-reset and
+              email-confirmation codes are sent to the address you gave.
+            </p>
+          </Clause>
+          <Clause title="Keeping and removing your data">
+            <p>
+              Application records are kept while you are a member and for the
+              life of the club's records afterwards, unless you remove them. You
+              can delete your account and membership record yourself at any time
+              from your member page: it erases your sign-in and everything in
+              the membership record. Messages you sent through the contact form
+              are kept, without a link to your account. If you would rather ask,
+              use the contact form on the Join page.
+            </p>
+            <p>
+              Page-view and error records contain nothing that identifies a
+              person and are deleted automatically after 90 days.
             </p>
           </Clause>
         </div>
@@ -143,6 +173,27 @@ export function NotFoundPage() {
         title="Nothing at this address"
         standfirst="The page you asked for does not exist, possibly because the site was restructured and an old link survived somewhere."
       />
+      <Section>
+        <nav aria-label="Where to go instead" className="border-t border-rule pt-10">
+          <p className="label">Try one of these</p>
+          <ul className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-lg">
+            {[
+              ["Home", "/"],
+              ["About", "/about"],
+              ["Programs", "/programs"],
+              ["Media", "/media"],
+              ["Team", "/team"],
+              ["Join", "/join"],
+            ].map(([label, to]) => (
+              <li key={to}>
+                <Link to={to} className="text-glow-bright underline underline-offset-4">
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </Section>
     </Page>
   );
 }

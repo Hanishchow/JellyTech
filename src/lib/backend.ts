@@ -125,6 +125,28 @@ export interface Backend {
   signIn(email: string, password: string): Promise<Member>;
   signOut(): Promise<void>;
   currentMember(): Promise<Member | null>;
+
+  /** Step 1 of a reset: mail a six-digit code. Never reveals whether the address has an account. */
+  requestPasswordReset(email: string): Promise<void>;
+  /** Step 2: trade the code for a short-lived reset token. */
+  confirmResetCode(email: string, code: string): Promise<string>;
+  /** Step 3: set the new password with that token. */
+  resetPassword(token: string, newPassword: string): Promise<void>;
+
+  /**
+   * Whether the signed-in account's email is confirmed, or null when that is
+   * unknowable (not signed in, or the local stand-in).
+   *
+   * Soft verification: nothing in the site is gated on this. It exists so a
+   * member can confirm their address and the club can tell a real one from a
+   * typo, not as an access control.
+   */
+  emailVerified(): Promise<boolean | null>;
+  verifyEmail(email: string, code: string): Promise<void>;
+  resendVerification(email: string): Promise<void>;
+
+  /** Removes the signed-in member's account and membership record for good. */
+  deleteAccount(): Promise<void>;
 }
 
 const PASSWORD_MIN = 8;
@@ -272,7 +294,16 @@ function createInsforgeBackend(insforge: NonNullable<typeof sharedClient>): Back
         subject: message.subject,
         body: message.body,
       });
-      if (insert.error) throw new Error("Could not send the message.");
+      if (insert.error) {
+        // The write cap in migration 003 raises "Too many requests…"; say so
+        // rather than implying the message itself was the problem.
+        const reason = String((insert.error as { message?: unknown }).message ?? "");
+        throw new Error(
+          /too many requests/i.test(reason)
+            ? "The inbox is busy right now. Try again in a minute."
+            : "Could not send the message."
+        );
+      }
     },
 
     async signIn(email, password) {
@@ -304,6 +335,74 @@ function createInsforgeBackend(insforge: NonNullable<typeof sharedClient>): Back
       const { data, error } = await insforge.auth.getCurrentUser();
       if (error || !data?.user?.id) return null;
       return memberFor(data.user.id);
+    },
+
+    async requestPasswordReset(email) {
+      const { error } = await insforge.auth.sendResetPasswordEmail({
+        email: email.trim().toLowerCase(),
+      });
+      if (error) {
+        throw new Error(
+          error instanceof Error ? error.message : "Could not send the code."
+        );
+      }
+    },
+
+    async confirmResetCode(email, code) {
+      const result = await insforge.auth.exchangeResetPasswordToken({
+        email: email.trim().toLowerCase(),
+        code: code.trim(),
+      });
+      return unwrap(result, "That code is not right, or it has expired.").token;
+    },
+
+    async resetPassword(token, newPassword) {
+      const result = await insforge.auth.resetPassword({ newPassword, otp: token });
+      unwrap(result, "Could not set the new password.");
+    },
+
+    async emailVerified() {
+      const { data, error } = await insforge.auth.getCurrentUser();
+      const user = data?.user as { emailVerified?: boolean } | null | undefined;
+      if (error || !user || typeof user.emailVerified !== "boolean") return null;
+      return user.emailVerified;
+    },
+
+    async verifyEmail(email, code) {
+      const result = await insforge.auth.verifyEmail({
+        email: email.trim().toLowerCase(),
+        otp: code.trim(),
+      });
+      unwrap(result, "That code is not right, or it has expired.");
+    },
+
+    async resendVerification(email) {
+      const { error } = await insforge.auth.resendVerificationEmail({
+        email: email.trim().toLowerCase(),
+      });
+      if (error) {
+        throw new Error(
+          error instanceof Error ? error.message : "Could not send a new code."
+        );
+      }
+    },
+
+    async deleteAccount() {
+      // The function can only name auth.uid(), so there is no id to pass.
+      const { error } = await insforge.database.rpc("delete_my_account");
+      if (error) {
+        throw new Error(
+          typeof error === "object" && "message" in error
+            ? String((error as { message: unknown }).message)
+            : "Could not delete the account."
+        );
+      }
+      try {
+        await insforge.auth.signOut();
+      } catch {
+        /* the user is already gone server-side; clearing local state is enough */
+      }
+      forgetSession();
     },
   };
 }
@@ -397,6 +496,39 @@ function createLocalBackend(): Backend {
       const id = read<string | null>(KEY_SESSION, null);
       if (!id) return null;
       return read<Member[]>(KEY_MEMBERS, []).find((m) => m.id === id) ?? null;
+    },
+
+    async requestPasswordReset() {
+      throw new Error("Password reset needs the live backend.");
+    },
+
+    async confirmResetCode() {
+      throw new Error("Password reset needs the live backend.");
+    },
+
+    async resetPassword() {
+      throw new Error("Password reset needs the live backend.");
+    },
+
+    async emailVerified() {
+      return null;
+    },
+
+    async verifyEmail() {
+      throw new Error("Email verification needs the live backend.");
+    },
+
+    async resendVerification() {
+      throw new Error("Email verification needs the live backend.");
+    },
+
+    async deleteAccount() {
+      const id = read<string | null>(KEY_SESSION, null);
+      write(
+        KEY_MEMBERS,
+        read<Member[]>(KEY_MEMBERS, []).filter((m) => m.id !== id)
+      );
+      write(KEY_SESSION, null);
     },
   };
 }

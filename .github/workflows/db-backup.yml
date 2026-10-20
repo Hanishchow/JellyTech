@@ -1,0 +1,90 @@
+# Weekly encrypted backup of the club's database.
+#
+# WHY IT IS ENCRYPTED. This repository is public, and so are its Actions
+# artifacts: anyone signed in to GitHub can download one. The dump holds members'
+# names, emails and USNs. So it is encrypted with a passphrase that only lives in
+# the repository secrets and in the maintainer's password manager, and the
+# plaintext never leaves the runner. Never commit a dump, encrypted or not.
+#
+# Needs two repository secrets (Settings > Secrets and variables > Actions):
+#   INSFORGE_API_KEY   the project's admin key (`api_key` in .insforge/project.json)
+#   BACKUP_PASSPHRASE  a long random passphrase; lose it and the backups are noise
+#
+# Restore notes are in docs/backup.md.
+name: Database backup
+
+on:
+  schedule:
+    # Sundays 02:17 UTC. An odd minute, because the top of the hour is crowded.
+    - cron: "17 2 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install the InsForge CLI
+        run: npm install -g @insforge/cli@0.2.0
+
+      - name: Link the project
+        env:
+          INSFORGE_API_KEY: ${{ secrets.INSFORGE_API_KEY }}
+        run: |
+          if [ -z "$INSFORGE_API_KEY" ]; then
+            echo "::error::INSFORGE_API_KEY is not set. See the header of this file."
+            exit 1
+          fi
+          mkdir -p .insforge
+          # The ids below are identifiers, not credentials. Only the key is secret.
+          node -e '
+            require("fs").writeFileSync(".insforge/project.json", JSON.stringify({
+              project_id: "56b2afe0-1dbb-4855-b6f1-6ff18fffb299",
+              project_name: "jellytech",
+              org_id: "6bf3ce54-87ca-4c41-9af1-150118b1ffb8",
+              appkey: "6v9g2tra",
+              region: "ap-southeast",
+              api_key: process.env.INSFORGE_API_KEY,
+              oss_host: "https://6v9g2tra.ap-southeast.insforge.app"
+            }));
+          '
+
+      - name: Export and encrypt
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::BACKUP_PASSPHRASE is not set. See the header of this file."
+            exit 1
+          fi
+          umask 077
+          # The CLI writes a JSON envelope ({"format","data","timestamp"}), not bare
+          # SQL; the SQL is the `data` string. Unwrap it so a restore is plain SQL.
+          insforge db export --row-limit 100000 --output export.json
+          node -e '
+            const fs = require("fs");
+            const { data } = JSON.parse(fs.readFileSync("export.json", "utf8"));
+            if (typeof data !== "string") throw new Error("export has no data field");
+            fs.writeFileSync("backup.sql", data);
+          '
+          rm -f export.json
+          # A tiny file or no INSERTs means the export failed quietly; do not upload it.
+          test "$(wc -c < backup.sql)" -gt 1000
+          grep -q "^INSERT INTO" backup.sql
+          printf '%s' "$BACKUP_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback \
+            --passphrase-fd 0 --symmetric --cipher-algo AES256 -o "jellytech-$(date -u +%F).sql.gpg" backup.sql
+          rm -f backup.sql .insforge/project.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jellytech-db-backup
+          path: jellytech-*.sql.gpg
+          retention-days: 30
+          if-no-files-found: error

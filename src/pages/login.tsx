@@ -49,14 +49,38 @@ export function LoginPage() {
         <form onSubmit={onSubmit} className="max-w-sm space-y-5 pt-8">
           <label className="block">
             <span className="label">Email</span>
-            <input name="email" type="email" required className={cn(field, "mt-2")} />
+            <input
+              name="email"
+              type="email"
+              required
+              maxLength={254}
+              autoComplete="email"
+              className={cn(field, "mt-2")}
+            />
           </label>
           <label className="block">
             <span className="label">Password</span>
-            <input name="password" type="password" required className={cn(field, "mt-2")} />
+            <input
+              name="password"
+              type="password"
+              required
+              maxLength={128}
+              autoComplete="current-password"
+              className={cn(field, "mt-2")}
+            />
           </label>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          <p className="-mt-2 text-sm">
+            <Link to="/forgot-password" className="text-glow-bright underline underline-offset-4">
+              Forgot your password?
+            </Link>
+          </p>
+
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
 
           <LiquidMetalButton
             type="submit"

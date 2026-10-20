@@ -10,8 +10,11 @@ import {
   type Interest,
   type PendingAccount,
 } from "@/lib/backend";
+import { Link } from "react-router-dom";
 import { OAuthButtons } from "@/components/ui/oauth-button";
 import { ContactForm } from "@/components/ui/contact-form";
+import { FieldError, Honeypot, looksAutomated, useFormClock } from "@/components/ui/form-bits";
+import { LIMITS, validateApplication, type FieldErrors } from "@/lib/validate";
 import { cn } from "@/lib/utils";
 import { LiquidMetalButton } from "@/components/ui/liquid-metal-button";
 
@@ -24,12 +27,14 @@ const WHY = [
 const YEARS = ["1st year", "2nd year", "3rd year", "4th year", "Postgraduate", "Faculty / staff"];
 
 const field =
-  "w-full border border-rule bg-ground px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-glow focus:outline-none";
+  "w-full border border-rule bg-ground px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-glow focus:outline-none aria-[invalid=true]:border-destructive";
 
 export function JoinPage() {
   const [interests, setInterests] = useState<Interest[]>([]);
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const elapsed = useFormClock();
 
   // Someone who signed in with Google already has an account but no
   // membership. They finish the same form, minus the password they would
@@ -65,19 +70,37 @@ export function JoinPage() {
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    setState("sending");
 
     const data = new FormData(event.currentTarget);
     const details = {
       name: String(data.get("name") ?? "").trim(),
       email: String(data.get("email") ?? "").trim().toLowerCase(),
       usn: String(data.get("usn") ?? "").trim() || undefined,
-      department: String(data.get("department")) as Department,
-      year: String(data.get("year")),
+      // A select still on its disabled placeholder is left out of FormData, and
+      // String(null) would read as a real answer.
+      department: String(data.get("department") ?? "") as Department,
+      year: String(data.get("year") ?? ""),
       interests,
       motivation: String(data.get("motivation") ?? "").trim() || undefined,
     };
 
+    const problems = validateApplication(
+      {
+        ...details,
+        password: pending ? undefined : String(data.get("password") ?? ""),
+      },
+      backend.passwordMinLength
+    );
+    setErrors(problems);
+    if (Object.keys(problems).length > 0) return;
+
+    // A script gets the same "recorded" screen a person does and nothing is stored.
+    if (looksAutomated(data, elapsed())) {
+      setState("done");
+      return;
+    }
+
+    setState("sending");
     try {
       if (pending) {
         await backend.completeApplication(details);
@@ -152,6 +175,27 @@ export function JoinPage() {
               founding intake opens. Your account is active now, so you can sign
               in to the member area any time.
             </p>
+            <ol className="measure mt-8 list-decimal space-y-2 pl-5 text-ink-muted marker:text-glow-bright">
+              <li>
+                Open{" "}
+                <Link to="/dashboard" className="text-glow-bright underline underline-offset-4">
+                  your member page
+                </Link>
+                {pending ? "." : " and confirm your email address with a 6-digit code."}
+              </li>
+              <li>
+                Look through{" "}
+                <Link to="/programs" className="text-glow-bright underline underline-offset-4">
+                  what is coming up
+                </Link>{" "}
+                and{" "}
+                <Link to="/team" className="text-glow-bright underline underline-offset-4">
+                  who runs what
+                </Link>
+                .
+              </li>
+              <li>Forgot your password later? Use the reset link on the sign-in page.</li>
+            </ol>
             {!backend.isLive && (
               <div className="mt-8">
                 <Note>
@@ -166,11 +210,13 @@ export function JoinPage() {
         ) : (
           <form
             onSubmit={onSubmit}
+            noValidate
             className={cn(
-              "grid gap-10 pt-10 lg:grid-cols-[1fr_20rem]",
+              "relative grid gap-10 pt-10 lg:grid-cols-[1fr_20rem]",
               !pending && "border-t border-rule"
             )}
           >
+            <Honeypot />
             <div className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
                 <label className="block">
@@ -178,9 +224,14 @@ export function JoinPage() {
                   <input
                     name="name"
                     required
+                    maxLength={LIMITS.name}
+                    autoComplete="name"
                     defaultValue={pending?.name ?? ""}
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "join-name-error" : undefined}
                     className={cn(field, "mt-2")}
                   />
+                  <FieldError id="join-name-error" message={errors.name} />
                 </label>
                 <label className="block">
                   <span className="label">Email</span>
@@ -191,14 +242,26 @@ export function JoinPage() {
                     name="email"
                     type="email"
                     required
+                    maxLength={LIMITS.email}
+                    autoComplete="email"
                     defaultValue={pending?.email ?? ""}
                     readOnly={!!pending}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "join-email-error" : undefined}
                     className={cn(field, "mt-2", pending && "text-ink-muted")}
                   />
+                  <FieldError id="join-email-error" message={errors.email} />
                 </label>
                 <label className="block">
                   <span className="label">USN (optional)</span>
-                  <input name="usn" className={cn(field, "mt-2")} />
+                  <input
+                    name="usn"
+                    maxLength={LIMITS.usn}
+                    aria-invalid={!!errors.usn}
+                    aria-describedby={errors.usn ? "join-usn-error" : undefined}
+                    className={cn(field, "mt-2")}
+                  />
+                  <FieldError id="join-usn-error" message={errors.usn} />
                 </label>
                 {!pending && (
                   <label className="block">
@@ -213,30 +276,50 @@ export function JoinPage() {
                       type="password"
                       required
                       minLength={backend.passwordMinLength}
+                      maxLength={128}
                       autoComplete="new-password"
+                      aria-invalid={!!errors.password}
+                      aria-describedby={errors.password ? "join-password-error" : undefined}
                       className={cn(field, "mt-2")}
                     />
+                    <FieldError id="join-password-error" message={errors.password} />
                   </label>
                 )}
                 <label className="block">
                   <span className="label">Year</span>
-                  <select name="year" required defaultValue="" className={cn(field, "mt-2")}>
+                  <select
+                    name="year"
+                    required
+                    defaultValue=""
+                    aria-invalid={!!errors.year}
+                    aria-describedby={errors.year ? "join-year-error" : undefined}
+                    className={cn(field, "mt-2")}
+                  >
                     <option value="" disabled>Select</option>
                     {YEARS.map((year) => (
                       <option key={year} value={year}>{year}</option>
                     ))}
                   </select>
+                  <FieldError id="join-year-error" message={errors.year} />
                 </label>
               </div>
 
               <label className="block">
                 <span className="label">Department</span>
-                <select name="department" required defaultValue="" className={cn(field, "mt-2")}>
+                <select
+                  name="department"
+                  required
+                  defaultValue=""
+                  aria-invalid={!!errors.department}
+                  aria-describedby={errors.department ? "join-department-error" : undefined}
+                  className={cn(field, "mt-2")}
+                >
                   <option value="" disabled>Select</option>
                   {DEPARTMENTS.map((dept) => (
                     <option key={dept} value={dept}>{dept}</option>
                   ))}
                 </select>
+                <FieldError id="join-department-error" message={errors.department} />
               </label>
 
               <fieldset>
@@ -266,10 +349,22 @@ export function JoinPage() {
 
               <label className="block">
                 <span className="label">Anything you want us to know (optional)</span>
-                <textarea name="motivation" rows={4} className={cn(field, "mt-2 resize-y")} />
+                <textarea
+                  name="motivation"
+                  rows={4}
+                  maxLength={LIMITS.motivation}
+                  aria-invalid={!!errors.motivation}
+                  aria-describedby={errors.motivation ? "join-motivation-error" : undefined}
+                  className={cn(field, "mt-2 resize-y")}
+                />
+                <FieldError id="join-motivation-error" message={errors.motivation} />
               </label>
 
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && (
+                <p role="alert" className="text-sm text-destructive">
+                  {error}
+                </p>
+              )}
 
               <LiquidMetalButton
                 type="submit"

@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import { asset } from "@/lib/asset";
 import { prefetchTeam } from "@/lib/content";
 
-const warmTeam = () => void prefetchTeam();
+// A warm-up only: if it fails, the Team page asks again and shows the error.
+const warmTeam = () => void prefetchTeam().catch(() => {});
 
 const NAV = [
   { title: "About", url: "/about" },

@@ -169,6 +169,55 @@ export async function setEnquiryHandled(id: string, handled: boolean) {
   if (error) fail(error, "Could not update the enquiry.");
 }
 
+/* --- traffic and errors --------------------------------------------------- */
+
+export interface PageView {
+  id: string;
+  path: string;
+  referrer_host: string | null;
+  created_at: string;
+}
+
+export interface ClientError {
+  id: string;
+  message: string;
+  source: string | null;
+  path: string | null;
+  created_at: string;
+}
+
+/**
+ * Page views from the last `days` days, newest first. Counting happens in the
+ * panel: a club's traffic is a few thousand rows a week at most, and a SQL view
+ * for it would be one more thing to migrate.
+ */
+export async function listRecentViews(days = 7): Promise<PageView[]> {
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const { data, error } = await db()
+    .from("page_views")
+    .select()
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(5000);
+  if (error) fail(error, "Could not read the page views.");
+  return (data ?? []) as PageView[];
+}
+
+export async function listRecentErrors(): Promise<ClientError[]> {
+  const { data, error } = await db()
+    .from("client_errors")
+    .select()
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) fail(error, "Could not read the error log.");
+  return (data ?? []) as ClientError[];
+}
+
+export async function dismissError(id: string) {
+  const { error } = await db().from("client_errors").delete().eq("id", id);
+  if (error) fail(error, "Could not dismiss the error.");
+}
+
 /* --- photographs ---------------------------------------------------------- */
 
 /** The bucket team photos live in. Public: these end up on a public page. */

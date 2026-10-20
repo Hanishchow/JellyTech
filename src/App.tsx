@@ -12,9 +12,12 @@ import { MediaPage } from '@/pages/media'
 import { TeamPage } from '@/pages/team'
 import { JoinPage } from '@/pages/join'
 import { LoginPage } from '@/pages/login'
+import { ForgotPasswordPage } from '@/pages/forgot-password'
 import { DashboardPage } from '@/pages/dashboard'
 import { PrivacyPage, TermsPage, NotFoundPage } from '@/pages/legal'
+import { ErrorBoundary } from '@/components/error-boundary'
 import { applySeo } from '@/lib/seo'
+import { trackPageView } from '@/lib/telemetry'
 
 /* The panel and the lab benches are split out of the main bundle. Three.js
    alone is ~500KB, and it is imported by a route the public never opens;
@@ -52,7 +55,6 @@ const REDIRECTS: Record<string, string> = {
   '/contact': '/join',
   '/signup': '/join',
   '/register': '/join',
-  '/forgot-password': '/login',
 }
 
 /* The loading screen is markup in index.html, so something has to take it away.
@@ -79,6 +81,7 @@ export default function App() {
 
   useEffect(() => {
     applySeo(pathname)
+    trackPageView(pathname)
   }, [pathname])
 
   /* The admin panel deliberately sits outside the site's chrome: no navbar, no
@@ -87,15 +90,17 @@ export default function App() {
     return (
       <>
         <DismissLoader />
-        <Suspense fallback={<div className="min-h-[100dvh] bg-ground" />}>
-          <Routes>
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/stamps" element={<StampsPage />} />
-            <Route path="/lab/medusa" element={<LabMedusaPage />} />
-            <Route path="/lab/original" element={<LabOriginalPage />} />
-            <Route path="/lab/framing" element={<LabFramingPage />} />
-          </Routes>
-        </Suspense>
+        <ErrorBoundary key={pathname}>
+          <Suspense fallback={<div className="min-h-[100dvh] bg-ground" />}>
+            <Routes>
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/stamps" element={<StampsPage />} />
+              <Route path="/lab/medusa" element={<LabMedusaPage />} />
+              <Route path="/lab/original" element={<LabOriginalPage />} />
+              <Route path="/lab/framing" element={<LabFramingPage />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </>
     )
   }
@@ -107,22 +112,25 @@ export default function App() {
       <MusicPlayer />
       <Navbar />
       <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/programs" element={<ProgramsPage />} />
-          <Route path="/media" element={<MediaPage />} />
-          <Route path="/team" element={<TeamPage />} />
-          <Route path="/join" element={<JoinPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          {Object.entries(REDIRECTS).map(([from, to]) => (
-            <Route key={from} path={from} element={<Navigate to={to} replace />} />
-          ))}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        <ErrorBoundary key={pathname}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/programs" element={<ProgramsPage />} />
+            <Route path="/media" element={<MediaPage />} />
+            <Route path="/team" element={<TeamPage />} />
+            <Route path="/join" element={<JoinPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            {Object.entries(REDIRECTS).map(([from, to]) => (
+              <Route key={from} path={from} element={<Navigate to={to} replace />} />
+            ))}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
       <Footer />
     </div>

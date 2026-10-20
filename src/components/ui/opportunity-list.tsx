@@ -6,7 +6,7 @@ import {
   listOpportunities,
   type PublishedOpportunity,
 } from "@/lib/content";
-import { Note } from "@/components/layout/editorial";
+import { LoadState, Note } from "@/components/layout/editorial";
 
 /**
  * The live Opportunity Calendar.
@@ -18,18 +18,31 @@ import { Note } from "@/components/layout/editorial";
  */
 export function OpportunityList() {
   const [rows, setRows] = useState<PublishedOpportunity[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    listOpportunities().then((next) => !cancelled && setRows(next));
+    setFailed(false);
+    listOpportunities()
+      .then((next) => !cancelled && setRows(next))
+      .catch(() => !cancelled && setFailed(true));
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
-  // Nothing is rendered while loading: a flash of "no opportunities yet"
-  // followed by a list is worse than a beat of nothing.
-  if (rows === null) return null;
+  // "Loading" rather than the empty-state note: a flash of "no opportunities
+  // yet" followed by a list is worse than a line saying it is on its way.
+  if (rows === null) {
+    return (
+      <LoadState
+        failed={failed}
+        what="the opportunity calendar"
+        onRetry={() => setAttempt((n) => n + 1)}
+      />
+    );
+  }
 
   if (rows.length === 0) {
     return (

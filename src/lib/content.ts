@@ -8,9 +8,13 @@
    directly. Adding `.eq("published", true)` here would be belt and braces at
    best and a false sense of security at worst.
 
-   Every function fails soft and returns an empty list. A club site whose
-   opportunity calendar is briefly unreachable should show the page without a
-   calendar, not an error where the page used to be.
+   A failed read rejects, and each list says so ("could not load, try again")
+   rather than quietly returning an empty list. An empty list now only ever
+   means the table has nothing published; it used to also mean the request had
+   failed, and the page told visitors the club had published nothing.
+
+   With no backend configured at all (a clone without a .env) the lists are
+   simply empty, which is true.
    ============================================================================= */
 
 import { insforge as client } from "@/lib/insforge";
@@ -52,13 +56,9 @@ export interface PublishedTeamMember {
 
 async function read<T>(table: string): Promise<T[]> {
   if (!client) return [];
-  try {
-    const { data, error } = await client.database.from(table).select();
-    if (error) return [];
-    return (data ?? []) as T[];
-  } catch {
-    return [];
-  }
+  const { data, error } = await client.database.from(table).select();
+  if (error) throw new Error(`Could not read ${table}.`);
+  return (data ?? []) as T[];
 }
 
 export const listOpportunities = () =>
@@ -75,13 +75,20 @@ let teamRequest: Promise<PublishedTeamMember[]> | null = null;
 
 /** One shared request, so prefetching on hover and rendering the page cost a single round trip. */
 export const listTeam = () => {
-  teamRequest ??= read<PublishedTeamMember>("team_members").then((rows) => {
-    // A failed read comes back empty; do not remember it.
-    if (rows.length === 0) teamRequest = null;
-    return rows.sort(
-      (a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name)
-    );
-  });
+  teamRequest ??= read<PublishedTeamMember>("team_members").then(
+    (rows) => {
+      // An empty roll may be momentary (nobody published yet); do not pin it.
+      if (rows.length === 0) teamRequest = null;
+      return rows.sort(
+        (a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name)
+      );
+    },
+    (error: unknown) => {
+      // A failure must not be remembered, or a retry would replay it.
+      teamRequest = null;
+      throw error;
+    }
+  );
   return teamRequest;
 };
 

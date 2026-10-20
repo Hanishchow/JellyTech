@@ -10,17 +10,22 @@ import {
   adminAvailable,
   createRow,
   deleteRow,
+  dismissError,
   isAdmin,
   listAll,
   listEnquiries,
   listMembers,
+  listRecentErrors,
+  listRecentViews,
   setEnquiryHandled,
   setMemberStatus,
   updateRow,
   uploadTeamPhoto,
   PHOTO_ACCEPT,
+  type ClientError,
   type Enquiry,
   type Opportunity,
+  type PageView,
   type Post,
   type TeamMember,
 } from "@/lib/admin";
@@ -42,7 +47,7 @@ import { cn } from "@/lib/utils";
    so the type comes down to 13-14px and the rules come closer together.
    -------------------------------------------------------------------------- */
 
-type Tab = "applications" | "enquiries" | "opportunities" | "posts" | "team";
+type Tab = "applications" | "enquiries" | "opportunities" | "posts" | "team" | "traffic";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "applications", label: "Applications" },
@@ -50,6 +55,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "opportunities", label: "Opportunities" },
   { id: "posts", label: "Media" },
   { id: "team", label: "Team" },
+  { id: "traffic", label: "Traffic & errors" },
 ];
 
 const noirField =
@@ -132,6 +138,7 @@ export function AdminPage() {
         {tab === "opportunities" && <Opportunities />}
         {tab === "posts" && <Posts />}
         {tab === "team" && <Team />}
+        {tab === "traffic" && <Traffic />}
       </div>
     </Shell>
   );
@@ -286,6 +293,104 @@ function Enquiries() {
           </div>
         </article>
       ))}
+    </section>
+  );
+}
+
+/* --- traffic and errors --------------------------------------------------- */
+
+/** Counts of each value, biggest first. */
+function tally<T>(rows: T[], key: (row: T) => string | null, top = 8) {
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const k = key(row);
+    if (k) counts.set(k, (counts.get(k) ?? 0) + 1);
+  }
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, top);
+}
+
+function Tally({ title, rows }: { title: string; rows: [string, number][] }) {
+  const max = rows[0]?.[1] ?? 1;
+  return (
+    <div>
+      <h3 className={noirLabel}>{title}</h3>
+      {rows.length === 0 ? (
+        <p className="mt-3 text-[13px] text-white/40">Nothing yet.</p>
+      ) : (
+        <ul className="mt-3 space-y-1.5">
+          {rows.map(([label, count]) => (
+            <li key={label} className="relative text-[13px]">
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 bg-white/10"
+                style={{ width: `${(count / max) * 100}%` }}
+              />
+              <span className="relative flex justify-between gap-4 px-2 py-1">
+                <span className="truncate text-white/70">{label}</span>
+                <span className="font-mono text-white/50">{count}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Traffic() {
+  const views = useRows<PageView>(useCallback(() => listRecentViews(7), []));
+  const errors = useRows<ClientError>(listRecentErrors);
+
+  // Newest day first, which is the order a person reads a week in.
+  const perDay = tally(views.rows, (v) => v.created_at.slice(0, 10), 7).sort((a, b) =>
+    b[0].localeCompare(a[0])
+  );
+
+  return (
+    <section className="space-y-10">
+      <div>
+        <p className="text-[13px] text-white/50">
+          Page views in the last 7 days:{" "}
+          <span className="font-mono text-white">{views.rows.length.toLocaleString()}</span>
+          . Counted by this site itself: no cookies, no IP addresses, nothing that identifies a
+          visitor. Browsers sending Do Not Track are not counted.
+        </p>
+        <Feedback error={views.error} busy={views.busy} empty={false} />
+      </div>
+
+      {!views.busy && !views.error && (
+        <div className="grid gap-10 md:grid-cols-3">
+          <Tally title="Top pages" rows={tally(views.rows, (v) => v.path)} />
+          <Tally title="Arrived from" rows={tally(views.rows, (v) => v.referrer_host)} />
+          <Tally title="Per day" rows={perDay} />
+        </div>
+      )}
+
+      <div>
+        <h3 className={noirLabel}>Recent errors in visitors' browsers</h3>
+        <div className="mt-3 space-y-3">
+          <Feedback error={errors.error} busy={errors.busy} empty={errors.rows.length === 0} />
+          {errors.rows.map((e) => (
+            <article key={e.id} className="border border-white/15 p-4">
+              <p className="break-words text-[13px] text-white/80">{e.message}</p>
+              <p className="mt-1 font-mono text-[11px] text-white/35">
+                {e.path ?? "?"}
+                {e.source ? ` · ${e.source}` : ""} · {new Date(e.created_at).toLocaleString()}
+              </p>
+              <button
+                type="button"
+                className={cn(noirDanger, "mt-3")}
+                onClick={async () => {
+                  await dismissError(e.id);
+                  errors.refresh();
+                }}
+              >
+                Dismiss
+              </button>
+            </article>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

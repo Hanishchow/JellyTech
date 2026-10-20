@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import SphereImageGrid, { type ImageData } from "@/components/ui/image-sphere";
 import { prefetchTeam, type PublishedTeamMember } from "@/lib/content";
-import { Note } from "@/components/layout/editorial";
+import { LoadState, Note } from "@/components/layout/editorial";
 
 /**
  * The team, as a sphere of faces.
@@ -17,16 +17,21 @@ import { Note } from "@/components/layout/editorial";
 export function TeamSphere() {
   const [members, setMembers] = useState<PublishedTeamMember[] | null>(null);
   const [size, setSize] = useState(560);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
+    setFailed(false);
     // Every photo starts downloading together as soon as the list arrives,
     // rather than each one waiting until the sphere turns it into view.
-    prefetchTeam().then((rows) => !cancelled && setMembers(rows));
+    prefetchTeam()
+      .then((rows) => !cancelled && setMembers(rows))
+      .catch(() => !cancelled && setFailed(true));
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   // The sphere is sized in pixels, not percentages, so it has to be told when
   // the window changes rather than reflowing on its own.
@@ -38,7 +43,15 @@ export function TeamSphere() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  if (members === null) return null;
+  if (members === null) {
+    return (
+      <LoadState
+        failed={failed}
+        what="the team"
+        onRetry={() => setAttempt((n) => n + 1)}
+      />
+    );
+  }
 
   const withPhotos = members.filter((m) => m.photo_url);
   const withoutPhotos = members.filter((m) => !m.photo_url);

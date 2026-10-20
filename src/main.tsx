@@ -6,6 +6,9 @@ import '@fontsource-variable/bricolage-grotesque/opsz.css'
 import '@fontsource-variable/instrument-sans'
 import '@fontsource-variable/geist-mono'
 import './styles/globals.css'
+import { installErrorReporting } from './lib/telemetry'
+
+installErrorReporting()
 
 /* A note for anyone who opens the console. Not in the page, because it is not
    the page's business; here, because this is where the people who go looking
