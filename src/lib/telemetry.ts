@@ -45,7 +45,9 @@ function referrerHost(): string | null {
   }
 }
 
-export function trackPageView(pathname: string) {
+export function trackPageView(rawPath: string) {
+  // GitHub Pages serves /about/ and the router sees /about; count them as one page.
+  const pathname = rawPath.length > 1 ? rawPath.replace(/\/+$/, "") : rawPath;
   // The panel and the lab benches are for the team, not the audience.
   if (pathname.startsWith("/admin") || pathname.startsWith("/lab")) return;
   if (!active() || pathname === lastPath) return;
