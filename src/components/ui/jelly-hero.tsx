@@ -45,6 +45,38 @@ function loadScript(src: string) {
   });
 }
 
+/**
+ * Resolves once the window has a real size.
+ *
+ * Upstream reads window.innerWidth/innerHeight exactly once, when the scene is
+ * built: the camera distance is `height / 1000` and the post-processing targets
+ * are sized from it. A page opened in a window that has not been laid out yet
+ * (a background or pre-rendered tab, an unfocused pane) reports 0x0, so the
+ * camera is placed at the origin, the targets have zero size, and a narrow-screen
+ * framing is chosen because 0 < 768. A resize later fixes the canvas but never
+ * re-places the camera, so the animal simply never appears. Waiting costs
+ * nothing when the window is already sized, which is nearly always.
+ */
+function whenSized(isCancelled: () => boolean) {
+  return new Promise<void>((resolve) => {
+    const ready = () => window.innerWidth > 0 && window.innerHeight > 0;
+    if (ready()) return resolve();
+
+    // `resize` is not guaranteed to fire for a window that was never shown, so
+    // poll as well.
+    const finish = () => {
+      window.removeEventListener("resize", check);
+      window.clearInterval(timer);
+      resolve();
+    };
+    const check = () => {
+      if (isCancelled() || ready()) finish();
+    };
+    window.addEventListener("resize", check);
+    const timer = window.setInterval(check, 200);
+  });
+}
+
 export function JellyHero() {
   const fallbackRef = useRef<HTMLCanvasElement>(null);
   const [fallback, setFallback] = useState(false);
@@ -64,6 +96,7 @@ export function JellyHero() {
       (chain, src) => chain.then(() => (cancelled ? undefined : loadScript(src))),
       Promise.resolve<void>(undefined)
     )
+      .then(() => whenSized(() => cancelled))
       .then(() => {
         if (cancelled) return;
         // Framing is rolled on every load, so no two arrivals are the same
