@@ -35,6 +35,13 @@ interface MedusaApp {
     framing?: MedusaFraming;
   }) => MedusaScene | null;
   stopBackground?: () => void;
+  /** Stops the loop but keeps the scene and its WebGL context. */
+  pauseBackground?: () => boolean;
+  /**
+   * Mounts the paused scene's canvas into `container` and resumes. False when
+   * there is no usable scene, in which case the caller starts a new one.
+   */
+  resumeBackground?: (container: HTMLElement) => boolean;
   /** A framing rolled within App.FRAMING. */
   randomFraming?: () => MedusaFraming;
   /** Applies a framing to a running scene. */

@@ -99,6 +99,11 @@ export function JellyHero() {
       .then(() => whenSized(() => cancelled))
       .then(() => {
         if (cancelled) return;
+        // Coming back to the home page: the scene from the last visit is still
+        // there, paused. Re-use it rather than asking for a second WebGL
+        // context; see App.pauseBackground in app.develop.js.
+        const host = document.getElementById("container");
+        if (host && window.App?.resumeBackground?.(host)) return;
         // Framing is rolled on every load, so no two arrivals are the same
         // photograph. The bounds live in App.FRAMING; /lab/framing is where
         // they get judged.
@@ -108,7 +113,9 @@ export function JellyHero() {
 
     return () => {
       cancelled = true;
-      window.App?.stopBackground?.();
+      // Pause, do not destroy: tearing the context down and rebuilding it on
+      // the way back is what left return visits to the home page empty.
+      window.App?.pauseBackground?.();
       field?.destroy();
     };
   }, []);

@@ -344,6 +344,13 @@ function Looper(context, update, render, delta) {
   var isLooping = false;
   var lastTime;
 
+  /* JellyTech patch. Upstream never restarted a loop, so stop() followed by
+     start() inside one frame left the old animation chain alive beside the new
+     one (isLooping is true again by the time the old callback runs), and the
+     scene then ran at double speed. Each start() now owns a generation, and a
+     callback from an earlier generation ends itself. */
+  var generation = 0;
+
   function animateStep(delta) {
     stepTime += delta;
     var steps = Math.floor(stepTime / targetDelta);
@@ -362,14 +369,14 @@ function Looper(context, update, render, delta) {
     _render.call(context, targetDelta, stepProgress);
   }
 
-  function animate() {
-    if (!isLooping) { return; }
+  function animate(gen) {
+    if (!isLooping || gen !== generation) { return; }
     var time = Date.now();
     var delta = Math.min(maxDelta, time - lastTime);
 
     _this.didUpdate = false;
     animateStep(delta);
-    requestAnimationFrame(animate);
+    requestAnimationFrame(function () { animate(gen); });
     lastTime = time;
   }
 
@@ -378,9 +385,11 @@ function Looper(context, update, render, delta) {
   };
 
   this.start = function () {
+    if (isLooping) { return; }
+    generation += 1;
     lastTime = Date.now();
     isLooping = true;
-    animate();
+    animate(generation);
   };
 
   this.toggle = function () {
@@ -3791,7 +3800,13 @@ App.frameCamera = function (scene, framing) {
 };
 
 App.startBackground = function (options) {
-  if (App.scene) { return App.scene; }
+  if (App.scene) {
+    /* A scene left paused by the home page. Bring it back into this page's
+       container instead of returning it stopped. If its context has since been
+       lost, resumeBackground drops it and a new one is built below. */
+    var host = document.getElementById('container');
+    if (!host || App.resumeBackground(host)) { return App.scene; }
+  }
 
   /* A machine with no WebGL — or a browser that has run out of live contexts —
      throws somewhere inside the renderer rather than returning anything we can
@@ -3824,6 +3839,44 @@ App.startBackground = function (options) {
   scene.loop.start();
 
   return scene;
+};
+
+/* Leaving the home page pauses the scene rather than destroying it.
+
+   Tearing it down meant calling loseContext() and then asking the browser for a
+   brand-new WebGL context on the way back. Browsers cap and throttle contexts,
+   and a context requested straight after one was deliberately lost can simply
+   be refused ("Error creating WebGL context"). The result was a home page that
+   rendered fine on first load and was an empty dark screen on every return
+   visit. Keeping the one context alive, paused, and re-mounting its canvas
+   avoids asking for a second one at all. */
+App.pauseBackground = function () {
+  var scene = App.scene;
+  if (!scene) { return false; }
+  scene.loop.stop();
+  return true;
+};
+
+/* Re-mounts the existing canvas into a fresh container and resumes. Returns
+   false when there is no scene to resume (the caller starts one instead). */
+App.resumeBackground = function (container) {
+  var scene = App.scene;
+  if (!scene || !container) { return false; }
+
+  var canvas = scene.renderer.domElement;
+  if (scene.renderer.getContext().isContextLost()) {
+    /* A genuinely lost context cannot be revived here. Drop the scene so the
+       caller builds a new one. */
+    App.scene = null;
+    if (canvas.parentNode) { canvas.parentNode.removeChild(canvas); }
+    return false;
+  }
+
+  scene.element = container;
+  if (canvas.parentNode !== container) { container.appendChild(canvas); }
+  scene.onWindowResize();
+  scene.loop.start();
+  return true;
 };
 
 App.stopBackground = function () {
