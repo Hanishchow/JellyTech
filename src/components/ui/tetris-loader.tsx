@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { asset } from "@/lib/asset";
+import { simUrl } from "@/lib/medusae";
 
 // What the hero needs before the curtain goes up. The medusae scripts are back
 // on this list because the hero loads them again, and the loading screen exists
 // precisely to cover their download and shader compile: reveal without warming
-// them and the reader watches a black rectangle instead.
+// them and the reader watches a black rectangle instead. They must be the same
+// URLs the hero requests (simUrl adds the version), or the preload is wasted.
 const HERO_ASSETS = [
-  asset("static/medusae/lib/three/three.js"),
-  asset("static/medusae/libs.develop.js"),
-  asset("static/medusae/shader-chunks.develop.js"),
-  asset("static/medusae/shaders.develop.js"),
-  asset("static/medusae/app.develop.js"),
+  simUrl("static/medusae/lib/three/three.js"),
+  simUrl("static/medusae/libs.develop.js"),
+  simUrl("static/medusae/shader-chunks.develop.js"),
+  simUrl("static/medusae/shaders.develop.js"),
+  simUrl("static/medusae/app.develop.js"),
 ];
 
 interface TetrisLoaderProps {

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createJellyField } from "@/components/ui/jelly-field";
 import { StampsPile } from "@/components/ui/stamps-pile";
-import { asset } from "@/lib/asset";
+import { simUrl } from "@/lib/medusae";
 
 /**
  * The hero: particulate-medusae, as published.
@@ -31,22 +31,13 @@ const SIM_SCRIPTS = [
   "static/medusae/app.develop.js",
 ];
 
-/**
- * Bump when anything under public/static/medusae changes. These files have
- * fixed names, and GitHub Pages lets a browser keep them for ten minutes, so
- * without a version in the URL a visitor could get this component's new code
- * running against the previous deploy's script. The query string makes the two
- * ship together.
- */
-const SIM_VERSION = "2026-10-22";
-
 function loadScript(src: string) {
   return new Promise<void>((resolve, reject) => {
     // Upstream defines its globals once and cannot be re-evaluated cleanly, so
     // a second visit reuses the scripts already in the document.
     if (document.querySelector(`script[data-sim="${src}"]`)) return resolve();
     const script = document.createElement("script");
-    script.src = `${asset(src)}?v=${SIM_VERSION}`;
+    script.src = simUrl(src);
     script.dataset.sim = src;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error(`failed to load ${src}`));
